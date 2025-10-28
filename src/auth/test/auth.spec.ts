@@ -6,10 +6,6 @@ import request from 'supertest';
 import { TestAppDataSource } from '../../config/test-data-source';
 import { ApprovalStatus } from '../../entities/approvalStatus.entity';
 import { UserRole } from '../../entities/user.entity';
-import { NoticeBoard } from '../../entities/notice-board.entity';
-import { ComplaintBoard } from '../../entities/complaint-board.entity';
-import { PollBoard } from '../../entities/poll-board.entity';
-import { Apartment } from '../../entities/apartment.entity';
 
 import app from '../../app';
 
