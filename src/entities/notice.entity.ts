@@ -7,12 +7,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  Index,
+  //Index,
 } from 'typeorm';
-import { User } from './user.entity';
+//import { User } from './user.entity';
 import { NoticeBoard } from './notice-board.entity';
 //import { Apartment } from './apartment.entity';
-// import { Comment } from "../entities/comment.entity";
+import { Comment } from '../entities/comment.entity';
 
 // =
 // : 공지사항
@@ -31,7 +31,7 @@ export class Notice {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: "uuid" })
+  @Column({ type: 'uuid' })
   userId!: string;
 
   @Column({ type: 'uuid', nullable: false })
@@ -77,17 +77,16 @@ export class Notice {
 // =
 // : 공지사항 댓글
 // =
-@Entity('comments')
+/* @Entity('comments')
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: "uuid" })
+  @Column({ type: 'uuid' })
   userId!: string;
 
-  @Column({ type: "uuid" })
+  @Column({ type: 'uuid' })
   commentId!: string;
-
 
   @Column({ type: 'text', nullable: false })
   writerName!: string;
@@ -96,7 +95,6 @@ export class Comment {
   content!: string;
 
   @ManyToOne(() => Notice, (notice) => notice.comments, { onDelete: 'CASCADE' })
-
   @JoinColumn({ name: 'noticeId' })
   notice!: Notice;
 
@@ -105,8 +103,8 @@ export class Comment {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
-}
-
+} */
+/* 
 // =
 // : 공지사항 알림
 // =
@@ -147,4 +145,4 @@ export class Notification {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
-}
+} */

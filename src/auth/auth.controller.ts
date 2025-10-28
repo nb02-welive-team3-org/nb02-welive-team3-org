@@ -6,7 +6,7 @@ import {
   LogoutRequestSchema,
   RefreshRequestSchema,
   RefreshResponseSchema,
-  SignupAdminRequestBodySchema,
+  SignupAdminRequestSchema,
   SignupAdminResponseSchema,
   SignupRequestSchema,
   SignupResponseSchema,
@@ -55,7 +55,7 @@ import { getSuperAdmin } from '../users/users.service';
 export const handleSignup: RequestHandler = async (req, res) => {
   const result = SignupRequestSchema.safeParse({ body: req.body });
   if (!result.success) {
-    throw new BadRequestError('잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.');
+    throw new BadRequestError(`잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다. ${result.error.message}`);
   }
 
   const signedupUser = await signup(result.data.body);
@@ -86,12 +86,12 @@ export const handleSignup: RequestHandler = async (req, res) => {
 };
 
 export const handleSignupAdmin: RequestHandler = async (req, res) => {
-  const body = SignupAdminRequestBodySchema.safeParse(req.body);
+  const body = SignupAdminRequestSchema.safeParse({ body: req.body });
   if (!body.success) {
-    throw new BadRequestError('잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.');
+    throw new BadRequestError(`잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다. ${body.error.message}`);
   }
 
-  const signedupUser = await signupAdmin(body.data);
+  const signedupUser = await signupAdmin(body.data.body);
 
   const response: z.infer<typeof SignupAdminResponseSchema> = {
     id: signedupUser.id,
@@ -115,9 +115,9 @@ export const handleSignupAdmin: RequestHandler = async (req, res) => {
 };
 
 export const handleSignupSuperAdmin: RequestHandler = async (req, res) => {
-  const result = SignupSuperAdminRequestSchema.safeParse(req);
+  const result = SignupSuperAdminRequestSchema.safeParse({ body: req.body });
   if (!result.success) {
-    throw new BadRequestError('잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.');
+    throw new BadRequestError(`잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다. ${result.error.message}`);
   }
 
   const signedupUser = await signupSuperAdmin(result.data.body);
@@ -137,7 +137,7 @@ export const handleSignupSuperAdmin: RequestHandler = async (req, res) => {
 export const handleLogin: RequestHandler = async (req, res) => {
   const result = LoginRequestSchema.safeParse({ body: req.body });
   if (!result.success) {
-    throw new BadRequestError('잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다');
+    throw new BadRequestError(`잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.`);
   }
 
   const loggedinUser = await login(result.data.body);
