@@ -1,14 +1,25 @@
 import { z } from "zod";
-import { BoardType } from "../entities/complaint-comment.entity";
+
+export const BoardTypeEnum = z.enum(["COMPLAINT", "NOTICE"]); // 나중에 NOTICE 추가 가능
 
 export const createCommentSchema = z.object({
-  content: z.string().min(1, "댓글 내용은 필수입니다."),
-  boardType: z.enum(BoardType),
-  boardId: z.string().uuid({ message: "boardId는 UUID 형식이어야 합니다." }),
+  content: z
+    .string()
+    .min(1, { message: "댓글 내용은 필수입니다." })
+    .max(500, { message: "댓글은 500자 이내여야 합니다." }),
+  boardId: z
+    .string()
+    .uuid({ message: "boardId는 UUID 형식이어야 합니다." }),
+  boardType: BoardTypeEnum,
 });
 
 export const updateCommentSchema = z.object({
-  content: z.string().min(1, "댓글 내용은 필수입니다."),
-  boardType: z.enum(BoardType),
-  boardId: z.string().uuid({ message: "boardId는 UUID 형식이어야 합니다." }),
+  content: z
+    .string()
+    .min(1, { message: "댓글 내용은 필수입니다." })
+    .max(500, { message: "댓글은 500자 이내여야 합니다." }),
 });
+
+export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
+export type BoardType = z.infer<typeof BoardTypeEnum>;
