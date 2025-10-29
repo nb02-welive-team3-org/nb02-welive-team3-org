@@ -1,0 +1,109 @@
+name: Deploy TypeScript Express API (Test)
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy build files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USER_TEST }}
+          key: ${{ secrets.EC2_KEY_TEST }}
+          source: |
+            dist
+            package.json
+            package-lock.json
+            deploy
+          target: /home/ubuntu/welive
+
+      - name: Create .env file on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USER_TEST }}
+          key: ${{ secrets.EC2_KEY_TEST }}
+          script: |
+            cat << 'EOF' > /home/ubuntu/welive/.env
+            PORT=${{ secrets.PORT_TEST }}
+            NODE_ENV=${{ secrets.NODE_ENV_TEST }}
+            DB_HOST=${{ secrets.DB_HOST_TEST }}
+            DB_PORT=${{ secrets.DB_PORT_TEST }}
+            DB_USERNAME=${{ secrets.DB_USERNAME_TEST }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD_TEST }}
+            DB_NAME=${{ secrets.DB_NAME_TEST }}
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET_TEST }}
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET_TEST }}
+            JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION_TEST }}
+            JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION_TEST }}
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN_TEST }}
+            AWS_REGION=${{ secrets.AWS_REGION_TEST }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
+            EOF
+
+      - name: Configure Nginx on EC2 (HTTP/HTTPS switch)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USER_TEST }}
+          key: ${{ secrets.EC2_KEY_TEST }}
+          script: |
+            if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
+              sudo mv /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+            else
+              sudo mv /home/ubuntu/welive/deploy/nginx-http.conf /etc/nginx/sites-available/welive
+            fi
+            sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
+            sudo rm -f /etc/nginx/sites-enabled/default
+            sudo nginx -t && sudo systemctl reload nginx
+
+      - name: Ensure Certbot and HTTPS setup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USER_TEST }}
+          key: ${{ secrets.EC2_KEY_TEST }}
+          script: |
+            sudo apt update -y
+            sudo apt install -y certbot python3-certbot-nginx
+            if [ ! -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
+              sudo certbot certonly --nginx -d api.welive-test.online --non-interactive --agree-tos -m admin@welive-test.online
+              sudo mv /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+              sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
+              sudo nginx -t && sudo systemctl reload nginx
+            else
+              echo "SSL certificate already exists, skipping issue."
+            fi
+
+      - name: Restart TypeScript Express app with PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USER_TEST }}
+          key: ${{ secrets.EC2_KEY_TEST }}
+          script: |
+            cd /home/ubuntu/welive
+            npm ci --omit=dev
+            pm2 restart welive-test || pm2 start dist/app.js --name welive-test
+            pm2 save
