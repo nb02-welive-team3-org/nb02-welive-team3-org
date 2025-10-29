@@ -32,7 +32,8 @@
     "test:auth:delete": "jest src/auth/test/delete-admin.spec.ts --runInBand --setupFilesAfterEnv ./src/auth/test/setup.ts",
     "test:apartments": "jest src/apartments/test/apartments.service.spec.ts --runInBand --setupFilesAfterEnv ./src/apartments/test/setup.ts",
     "test:users": "jest src/users/test/users.service.spec.ts --runInBand --setupFilesAfterEnv ./src/users/test/setup.ts",
-    "test:auth:integration": "jest src/auth/test/auth.spec.ts --runInBand --setupFilesAfterEnv ./src/auth/test/setup.ts"
+    "test:auth:integration": "jest src/auth/test/auth.spec.ts --runInBand --setupFilesAfterEnv ./src/auth/test/setup.ts",
+    "test:apartments:integration": "jest src/apartments/test/apartments.spec.ts --runInBand --setupFilesAfterEnv ./src/apartments/test/setup.ts"
   },
   "repository": {
     "type": "git",
