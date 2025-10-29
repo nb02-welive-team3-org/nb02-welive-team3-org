@@ -435,12 +435,15 @@ export const cleanup = async (userId: string) => {
   const userRepository = AppDataSource.getRepository('User');
   const apartmentRepository = AppDataSource.getRepository('Apartment');
   const residentRepository = AppDataSource.getRepository('Resident');
+
   const user = await userRepository.findOne({
     where: { id: userId },
   });
+
   if (!user) {
     throw new NotFoundError('존재하지 않는 사용자입니다.');
   }
+
   if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
     throw new ForbiddenError('접근 권한이 없습니다.');
   }
@@ -464,10 +467,11 @@ export const cleanup = async (userId: string) => {
       await userRepository.softDelete(admin.id);
     }
   } else if (user.role === UserRole.ADMIN) {
-    const residentsToDelete = await residentRepository.find({
-      where: { approvalStatus: ApprovalStatus.REJECTED },
-      withDeleted: false,
-    });
+    const residentsToDelete = await residentRepository
+      .createQueryBuilder('resident')
+      .innerJoinAndSelect('resident.user', 'user')
+      .where('user.joinStatus = :status', { status: ApprovalStatus.REJECTED })
+      .getMany();
 
     for (const resident of residentsToDelete) {
       await residentRepository.softDelete(resident.id);

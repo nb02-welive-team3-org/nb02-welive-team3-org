@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Complaint } from './complaint.entity';
-import { Notice } from "./notice.entity";
+import { Notice } from './notice.entity';
 
 export enum BoardType {
   COMPLAINT = 'COMPLAINT',
@@ -48,10 +48,8 @@ export class Comment {
   complaint?: Complaint;
 
   // 공지사항
-  @ManyToOne(() => Notice, (notice) => notice.comments, { nullable: true, onDelete: "CASCADE" })
-
-
-  @JoinColumn({ name: "notice_id" })
+  @ManyToOne(() => Notice, (notice) => notice.comments, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'notice_id' })
   notice?: Notice;
 
   @CreateDateColumn({ name: 'created_at' })
