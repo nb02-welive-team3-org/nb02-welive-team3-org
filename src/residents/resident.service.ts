@@ -179,6 +179,8 @@ export const registerResidentsFromCsv = async (
       .insert()
       .values(insertRows)
       .execute();
+  } else {
+    throw new ConflictError('이미 등록된 입주민입니다.');
   }
 
   return { count: insertRows.length };

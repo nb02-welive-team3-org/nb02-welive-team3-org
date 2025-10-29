@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { User } from '../entities/user.entity';
@@ -7,6 +6,7 @@ import { Resident } from '../entities/resident.entity';
 import { NoticeBoard } from '../entities/notice-board.entity';
 import { ComplaintBoard } from '../entities/complaint-board.entity';
 import { Complaint } from '../entities/complaint.entity';
+import { Notice } from '../entities/notice.entity';
 import { PollBoard } from '../entities/poll-board.entity';
 import { Vote } from '../entities/vote.entity';
 import { Poll } from '../entities/poll.entity';
@@ -33,8 +33,9 @@ export const TestAppDataSource = new DataSource({
     Resident,
     NoticeBoard,
     ComplaintBoard,
-    PollBoard,
     Complaint,
+    Notice,
+    PollBoard,
     Vote,
     Poll,
     PollOption,
@@ -42,6 +43,4 @@ export const TestAppDataSource = new DataSource({
     UserNotification,
     Comment,
   ],
-  migrations: [__dirname + '/../migrations/*.{ts,js}'],
-  subscribers: [],
 });

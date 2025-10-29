@@ -101,6 +101,10 @@ export const SignupAdminRequestBodySchema = z.object({
   apartmentManagementNumber: apartmentManagementNumber,
 });
 
+export const SignupAdminRequestSchema = z.object({
+  body: SignupAdminRequestBodySchema,
+});
+
 export const SignupAdminResponseSchema = z.object({
   id: id,
   name: name,

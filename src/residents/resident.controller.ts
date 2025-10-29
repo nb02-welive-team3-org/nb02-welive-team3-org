@@ -1,9 +1,10 @@
 import fs from 'fs';
 import dayjs from 'dayjs';
+import multer from 'multer';
 import { Response, Request, NextFunction } from 'express';
 import { createResidentSchema } from './dtos/create-resident.dto';
 import * as ResidentService from './resident.service';
-import { BadRequestError, NotFoundError, InternalServerError } from '../types/error.type';
+import { BadRequestError, NotFoundError, InternalServerError, ConflictError } from '../types/error.type';
 import { AppDataSource } from '../config/data-source';
 import { User } from '../entities/user.entity';
 import { RESIDENT_CSV_TEMPLATE_PATH } from './resident.constants';
@@ -134,7 +135,7 @@ export const uploadResidentsFromFile = async (req: Request, res: Response, next:
     const file = req.file;
 
     if (!file) {
-      throw new BadRequestError('CSV 파일이 필요합니다.');
+      throw next(new BadRequestError('CSV 파일만 업로드 가능합니다.'));
     }
 
     const payload = req.user as Payload;
@@ -156,6 +157,19 @@ export const uploadResidentsFromFile = async (req: Request, res: Response, next:
       count,
     });
   } catch (error: unknown) {
+    if (error instanceof multer.MulterError) {
+      switch (error.code) {
+        case 'LIMIT_FILE_SIZE':
+          return next(new BadRequestError('업로드 가능한 파일 크기를 초과했습니다.'));
+        case 'LIMIT_UNEXPECTED_FILE':
+          return next(new BadRequestError('CSV 파일만 업로드 가능합니다.'));
+        default:
+          return next(new BadRequestError(`파일 업로드 오류 (${error.code})`));
+      }
+    }
+    if (error instanceof ConflictError) {
+      return next(error);
+    }
     return next(error);
   }
 };

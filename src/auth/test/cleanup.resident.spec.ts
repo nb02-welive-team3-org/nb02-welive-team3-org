@@ -50,11 +50,26 @@ describe('AuthService - cleanup (Resident)', () => {
       building: '101',
       unitNumber: '101',
       apartment: apartment,
-      residentStatus: ResidenceStatus.RESIDENCE,
-      approvalStatus: ApprovalStatus.REJECTED,
+      residenceStatus: ResidenceStatus.RESIDENCE,
     });
 
+    const rejectedUser = await userRepo.save({
+      username: 'rejectuser',
+      password: 'rejectpass',
+      contact: '010',
+      name: 'r1',
+      email: 'reject@test.com',
+      role: UserRole.USER,
+      joinStatus: ApprovalStatus.REJECTED,
+      apartment: apartment,
+      resident: resident,
+    });
+
+    resident.user = rejectedUser;
+    await residentRepo.save(resident);
+
     await cleanup(admin.id);
+
     const deleted = await residentRepo.findOne({ where: { id: resident.id }, withDeleted: true });
     expect(deleted).toBeDefined();
     expect(deleted?.deletedAt).not.toBeNull();
@@ -86,8 +101,7 @@ describe('AuthService - cleanup (Resident)', () => {
       building: '101',
       unitNumber: '101',
       apartment: apartment,
-      residentStatus: ResidenceStatus.RESIDENCE,
-      approvalStatus: ApprovalStatus.APPROVED,
+      residenceStatus: ResidenceStatus.RESIDENCE,
     });
 
     const normal = await userRepo.save({
@@ -101,6 +115,9 @@ describe('AuthService - cleanup (Resident)', () => {
       apartment: apartment,
       resident: resident,
     });
+
+    resident.user = normal;
+    await residentRepo.save(resident);
 
     await expect(cleanup(normal.id)).rejects.toThrow(ForbiddenError);
   });

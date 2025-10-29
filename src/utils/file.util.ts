@@ -1,10 +1,21 @@
 import multer from 'multer';
+import path from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { BadRequestError } from '../types/error.type';
 
 export const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+export const uploadCsv = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const isCsv = file.mimetype === 'text/csv' || ext === '.csv';
+    cb(null, isCsv);
+  },
 });
 
 export const s3 = new S3Client({
