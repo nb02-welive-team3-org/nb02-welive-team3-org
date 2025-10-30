@@ -30,18 +30,15 @@ jobs:
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
           script: |
-            # 환경 세팅
             cd /home/ubuntu/welive-src
             rm -rf dist
-            npm ci
+            npm i
             npm run build
 
-            # 배포 디렉토리 교체
             rm -rf /home/ubuntu/welive
             mkdir -p /home/ubuntu/welive
             cp -r dist package.json package-lock.json deploy /home/ubuntu/welive
 
-            # .env 파일 생성
             cat << 'EOF' > /home/ubuntu/welive/.env
             PORT=${{ secrets.PORT_TEST }}
             NODE_ENV=${{ secrets.NODE_ENV_TEST }}
@@ -61,7 +58,6 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
             EOF
 
-            # nginx 설정
             if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
               sudo cp /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
             else
@@ -71,7 +67,6 @@ jobs:
             sudo rm -f /etc/nginx/sites-enabled/default
             sudo nginx -t && sudo systemctl reload nginx
 
-            # SSL 인증서 없으면 발급
             if [ ! -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
               sudo apt update -y
               sudo apt install -y certbot python3-certbot-nginx
@@ -80,8 +75,10 @@ jobs:
               sudo nginx -t && sudo systemctl reload nginx
             fi
 
-            # PM2 실행
             cd /home/ubuntu/welive
-            npm ci --omit=dev
-            pm2 restart welive-test || pm2 start dist/app.js --name welive-test
+            sudo rm -rf node_modules package-lock.json
+            npm cache clean --force
+            npm i
+            pm2 delete welive-test || true
+            pm2 start dist/app.js --name welive-test
             pm2 save
