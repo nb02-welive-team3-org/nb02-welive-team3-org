@@ -28,7 +28,7 @@ export class Complaint {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;
 
   @ManyToOne(() => ComplaintBoard, (board) => board.complaints, {
@@ -38,7 +38,13 @@ export class Complaint {
   @JoinColumn({ name: 'board_id' })
   complaintBoard?: ComplaintBoard | null;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({
+    name: 'board_id',
+    type: 'uuid',
+    nullable: true,
+    insert: false,
+    update: false,
+  })
   boardId?: string | null;
 
   @Column({ length: 100 })
@@ -60,22 +66,23 @@ export class Complaint {
   @Column({ default: 0 })
   viewsCount!: number;
 
-  @Column({ default: 0 })
-  commentsCount!: number;
-
   @Column({ nullable: true })
   dong?: string;
 
   @Column({ nullable: true })
   ho?: string;
 
-  // 민원 댓글
+  /**
+   * 댓글(Comment)
+   */
   @OneToMany(() => Comment, (comment) => comment.complaint, {
     cascade: true,
   })
   comments!: Comment[];
 
-  // 민원 관련 알림
+  /**
+   * 알림(Notification)
+   */
   @OneToMany(() => Notification, (notification) => notification.complaint, {
     cascade: true,
   })
