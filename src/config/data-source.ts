@@ -8,7 +8,7 @@ const isProd = env.NODE_ENV === 'production';
 let extraOptions: any = {};
 
 if (isProd) {
-  const rdsCaPath = path.join(__dirname, '..', 'certs', 'rds-ca.pem');
+  const rdsCaPath = path.join(__dirname, '..', '..', 'certs', 'rds-ca.pem');
 
   if (fs.existsSync(rdsCaPath)) {
     extraOptions = {
