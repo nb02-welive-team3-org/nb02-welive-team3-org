@@ -15,7 +15,7 @@ import complaint from "./complaint/complaint.router";
 import vote from "./votes/votes.router";
 import notice from "./notice/notice.router";
 import pollSchedulerRouter from "./poll-scheduler/poll-scheduler.router";
-import complaintcomment from "./complaint/comments/comment.router";
+import complaintcomment from "./comments/comment.router";
 
 const app: Application = express();
 

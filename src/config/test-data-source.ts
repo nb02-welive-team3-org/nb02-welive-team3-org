@@ -13,7 +13,7 @@ import { Poll } from '../entities/poll.entity';
 import { PollOption } from '../entities/poll-option.entity';
 import { Notification } from '../entities/notification.entity';
 import { UserNotification } from '../entities/user-notification.entity';
-import { Comment } from '../entities/complaint-comment.entity';
+import { Comment } from '../entities/comment.entity';
 
 dotenv.config();
 
