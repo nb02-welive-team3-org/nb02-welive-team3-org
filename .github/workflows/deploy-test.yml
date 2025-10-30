@@ -34,6 +34,7 @@ jobs:
             rm -rf dist
             npm install
             npm run build
+            npm run copy:swagger
 
             cat << 'EOF' > .env
             PORT=${{ secrets.PORT_TEST }}
