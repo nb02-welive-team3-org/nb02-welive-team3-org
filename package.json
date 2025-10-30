@@ -36,8 +36,8 @@
     "test:apartments:integration": "jest src/apartments/test/apartments.spec.ts --runInBand --setupFilesAfterEnv ./src/apartments/test/setup.ts",
     "test:users:integration": "jest src/users/test/users.spec.ts --runInBand --setupFilesAfterEnv ./src/users/test/setup.ts",
     "test:residents:integration": "jest src/residents/test/resident.integration.test.ts --runInBand",
-    "copy-swagger": "cp -r src/swagger/openapi.yaml dist/swagger/",
-    "prestart": "npm run build && npm run copy-swagger"
+    "copy:swagger": "cp -r src/swagger/openapi.yaml dist/swagger/",
+    "prestart": "npm run build && npm run copy:swagger"
   },
   "repository": {
     "type": "git",
