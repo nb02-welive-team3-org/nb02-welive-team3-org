@@ -10,11 +10,11 @@ import { UserRole } from '../../entities/user.entity';
 import app from '../../app';
 
 describe('Auth API Integration (PostgreSQL)', () => {
-  let superAdminCookie: string[];
-  let adminCookie: string[];
-  let residentCookie: string[];
-  let adminId: string;
-  let residentId: string;
+  //let superAdminCookie: string[];
+  //let adminCookie: string[];
+  //let residentCookie: string[];
+  //let adminId: string;
+  //let residentId: string;
 
   const VALID_PASSWORD = 'superadmin1234!';
   const VALID_CONTACT_SUPER_ADMIN = '01099999999';
@@ -114,7 +114,7 @@ describe('Auth API Integration (PostgreSQL)', () => {
       })
       .expect(200);
 
-    superAdminCookie = Array.isArray(loginRes.headers['set-cookie'])
+    const superAdminCookie = Array.isArray(loginRes.headers['set-cookie'])
       ? loginRes.headers['set-cookie']
       : [loginRes.headers['set-cookie'] as string];
 
@@ -123,14 +123,13 @@ describe('Auth API Integration (PostgreSQL)', () => {
 
   it('POST /api/auth/signup/admin', async () => {
     const res = await request(app).post('/api/auth/signup/admin').send(BASE_ADMIN_CREDENTIALS).expect(201);
-    adminId = res.body.id;
+    //const adminId = res.body.id;
     expect(res.body.role).toBe(UserRole.ADMIN);
   });
 
   it('POST /api/auth/signup + login (Pending) - admin flow', async () => {
     const signupRes = await request(app).post('/api/auth/signup/admin').send(BASE_ADMIN_CREDENTIALS).expect(201);
-
-    adminId = signupRes.body.id;
+    //const adminId = signupRes.body.id;
     expect(signupRes.body.role).toBe(UserRole.ADMIN);
 
     await request(app)
@@ -223,14 +222,10 @@ describe('Auth API Integration (PostgreSQL)', () => {
       .send({ status: ApprovalStatus.APPROVED })
       .expect(200);
 
-    const res = await request(app)
+    await request(app)
       .post('/api/auth/login')
       .send({ username: BASE_ADMIN_CREDENTIALS.username, password: BASE_ADMIN_CREDENTIALS.password })
       .expect(200);
-
-    adminCookie = Array.isArray(res.headers['set-cookie'])
-      ? res.headers['set-cookie']
-      : [res.headers['set-cookie'] as string];
   });
 
   it('POST /api/auth/signup + approve - super-admin + admin flow', async () => {
@@ -254,7 +249,7 @@ describe('Auth API Integration (PostgreSQL)', () => {
       })
       .expect(200);
 
-    superAdminCookie = Array.isArray(superAdminLoginResponse.headers['set-cookie'])
+    const superAdminCookie = Array.isArray(superAdminLoginResponse.headers['set-cookie'])
       ? superAdminLoginResponse.headers['set-cookie']
       : [superAdminLoginResponse.headers['set-cookie'] as string];
 
@@ -271,17 +266,13 @@ describe('Auth API Integration (PostgreSQL)', () => {
       .send({ status: ApprovalStatus.APPROVED })
       .expect(200);
 
-    const adminLoginResponse = await request(app)
+    await request(app)
       .post('/api/auth/login')
       .send({
         username: BASE_ADMIN_CREDENTIALS.username,
         password: BASE_ADMIN_CREDENTIALS.password,
       })
       .expect(200);
-
-    adminCookie = Array.isArray(adminLoginResponse.headers['set-cookie'])
-      ? adminLoginResponse.headers['set-cookie']
-      : [adminLoginResponse.headers['set-cookie'] as string];
   });
 
   it('POST /api/auth/signup - resident signup (Pending)', async () => {
@@ -330,8 +321,7 @@ describe('Auth API Integration (PostgreSQL)', () => {
       .expect(200);
 
     const residentSignupResponse = await request(app).post('/api/auth/signup').send(BASE_USER_CREDENTIALS).expect(201);
-
-    residentId = residentSignupResponse.body.id;
+    //const residentId = residentSignupResponse.body.id;
     expect(residentSignupResponse.body.role).toBe(UserRole.USER);
   });
 
@@ -461,17 +451,13 @@ describe('Auth API Integration (PostgreSQL)', () => {
       .send({ status: ApprovalStatus.APPROVED })
       .expect(200);
 
-    const residentLoginResponse = await request(app)
+    await request(app)
       .post('/api/auth/login')
       .send({
         username: BASE_USER_CREDENTIALS.username,
         password: BASE_USER_CREDENTIALS.password,
       })
       .expect(200);
-
-    residentCookie = Array.isArray(residentLoginResponse.headers['set-cookie'])
-      ? residentLoginResponse.headers['set-cookie']
-      : [residentLoginResponse.headers['set-cookie'] as string];
   });
 
   it('POST /api/auth/refresh - super-admin refresh token', async () => {
