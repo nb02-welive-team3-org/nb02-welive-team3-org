@@ -54,6 +54,8 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
             EOF
 
+            npx typeorm-ts-node-commonjs -d src/config/data-source.ts migration:run
+
             if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
               sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
             else
@@ -73,5 +75,5 @@ jobs:
             fi
 
             pm2 delete welive-test || true
-            pm2 start dist/app.js --name welive-test
+            pm2 start npm --name "welive-test" -- run start
             pm2 save
