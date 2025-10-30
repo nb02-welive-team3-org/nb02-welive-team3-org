@@ -29,11 +29,7 @@ jobs:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
-          source: |
-            dist
-            package.json
-            package-lock.json
-            deploy
+          source: "dist,package.json,package-lock.json,deploy"
           target: /home/ubuntu/welive
 
       - name: Create .env file on EC2
