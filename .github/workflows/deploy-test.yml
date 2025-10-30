@@ -1,4 +1,4 @@
-name: Deploy TypeScript Express API (EC2 Build)
+name: Deploy TypeScript Express API (EC2 Direct Build)
 
 on:
   push:
@@ -13,33 +13,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy Source Code to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST_TEST }}
-          username: ${{ secrets.EC2_USER_TEST }}
-          key: ${{ secrets.EC2_KEY_TEST }}
-          timeout: 20m
-          source: "."
-          target: /home/ubuntu/welive-src
-
-      - name: Build and Deploy on EC2
+      - name: Deploy and Build on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
+          timeout: 20m
           script: |
-            cd /home/ubuntu/welive-src
+            cd /home/ubuntu
+
+            if [ ! -d "welive" ]; then
+              git clone https://github.com/JONGJIN-LEE1/nb02-welive-team3.git welive
+            fi
+
+            cd welive
+            git fetch --all
+            git reset --hard origin/develop
+
             rm -rf dist
-            npm i
+            npm install
             npm run build
 
-            rm -rf /home/ubuntu/welive
-            mkdir -p /home/ubuntu/welive
-            cp -r dist package.json package-lock.json deploy /home/ubuntu/welive
-
-            cat << 'EOF' > /home/ubuntu/welive/.env
+            cat << 'EOF' > .env
             PORT=${{ secrets.PORT_TEST }}
             NODE_ENV=${{ secrets.NODE_ENV_TEST }}
             DB_HOST=${{ secrets.DB_HOST_TEST }}
@@ -59,10 +55,11 @@ jobs:
             EOF
 
             if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
-              sudo cp /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
             else
-              sudo cp /home/ubuntu/welive/deploy/nginx-http.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-http.conf /etc/nginx/sites-available/welive
             fi
+
             sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
             sudo rm -f /etc/nginx/sites-enabled/default
             sudo nginx -t && sudo systemctl reload nginx
@@ -71,14 +68,10 @@ jobs:
               sudo apt update -y
               sudo apt install -y certbot python3-certbot-nginx
               sudo certbot certonly --nginx -d api.welive-test.online --non-interactive --agree-tos -m admin@welive-test.online
-              sudo cp /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
               sudo nginx -t && sudo systemctl reload nginx
             fi
 
-            cd /home/ubuntu/welive
-            sudo rm -rf node_modules package-lock.json
-            npm cache clean --force
-            npm i
             pm2 delete welive-test || true
             pm2 start dist/app.js --name welive-test
             pm2 save
