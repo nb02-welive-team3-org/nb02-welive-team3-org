@@ -7,7 +7,6 @@ import { NoticeListqueryDto } from './dto/list-notice.query.dto';
 import { User } from '../entities/user.entity';
 import { NoticeDetailResponseDto } from './dto/notifications-read.response.dto';
 import { _date } from 'zod/v4/core';
-
 import { UpdateRequestDto } from './dto/update-notice.request.dto';
 import { UpdateResponseSchema } from './dto/update-notice.response.dto';
 import { DeleteNoticeRequestDtoType, DeleteNoticeResponseDto } from './dto/delete-notice.dto';
