@@ -33,8 +33,7 @@ jobs:
 
             rm -rf dist
             npm install
-            npm run build
-            npm run copy:swagger
+            npm run prestart
 
             cat << 'EOF' > .env
             PORT=${{ secrets.PORT_TEST }}
@@ -55,7 +54,7 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
             EOF
 
-            npx typeorm-ts-node-commonjs -d src/config/data-source.ts migration:run
+            npm run migration:run
 
             if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
               sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
