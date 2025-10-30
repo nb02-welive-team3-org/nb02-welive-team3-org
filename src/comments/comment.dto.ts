@@ -1,7 +1,9 @@
+export type BoardType = 'COMPLAINT' | 'NOTICE';
+
 export class CreateCommentDto {
   content!: string;
   boardId!: string;
-  boardType!: 'COMPLAINT' | 'NOTICE';;
+  boardType!: BoardType;
 }
 
 export class UpdateCommentDto {
@@ -19,12 +21,18 @@ export class CommentResponseDto {
 
 export class BoardInfoDto {
   id!: string;
-  boardType!: 'COMPLAINT' | 'NOTICE';;
+  boardType!: BoardType;
 }
 
 export class CommentWithBoardResponseDto {
   comment!: CommentResponseDto;
   board!: BoardInfoDto;
+}
+
+export class CommentsListResponseDto {
+  comments!: CommentResponseDto[];
+  board!: BoardInfoDto;
+  total!: number;
 }
 
 export class DeleteCommentResponseDto {

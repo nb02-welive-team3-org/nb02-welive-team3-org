@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Complaint } from './complaint.entity';
+import { Notice } from './notice.entity';
 
 @Entity({ name: 'comments' })
 export class Comment {
@@ -28,19 +29,31 @@ export class Comment {
   @Column({ type: 'text' })
   writerName!: string;
 
+  // 민원
   @ManyToOne(() => Complaint, (complaint) => complaint.comments, {
+    nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'complaint_id' })
-  complaint!: Complaint;
+  complaint?: Complaint;
 
-  @Column({ type: 'uuid' })
-  complaintId!: string;
+  @Column({ type: 'uuid', nullable: true })
+  complaintId?: string;
+
+  // 공지사항
+  @ManyToOne(() => Notice, (notice) => notice.comments, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'notice_id' })
+  notice?: Notice;
+
+  @Column({ type: 'uuid', nullable: true })
+  noticeId?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
-  notice: any;
 }
