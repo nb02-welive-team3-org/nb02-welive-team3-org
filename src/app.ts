@@ -15,6 +15,7 @@ import complaint from "./complaint/complaint.router";
 import vote from "./votes/votes.router";
 import notice from "./notice/notice.router";
 import pollSchedulerRouter from "./poll-scheduler/poll-scheduler.router";
+import { setupSwagger } from "./swagger/swaggerSetup";
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+setupSwagger(app);
 
 app.use("/api", root);
 app.use("/api/auth", auth);
