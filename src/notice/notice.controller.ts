@@ -5,7 +5,7 @@ import * as noticeService from './notice.service'
 import { UpdateRequestSchema } from './dto/update-notice.request.dto'
 import { DeleteNoticeRequestDto } from './dto/delete-notice.dto'
 
-
+//공지사항 CRUD 
 export const CreateNotice = async (req: Request, res: Response) => {
     const Result = CreateNoticeRequestSchema.parse({
         userId: (req as any).user?.id,
@@ -48,3 +48,4 @@ export const DeleteNotice = async (req: Request, res: Response) => {
     const response = await noticeService.DeleteNotice(Result);
     return res.status(200).json(response);
 };
+
