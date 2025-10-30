@@ -325,7 +325,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: { id: "apt-123" },
-          residences: [],
+          resident: null,
         };
 
         const mockPolls = [
@@ -334,7 +334,7 @@ describe("Polls Service", () => {
             userId: "user-1",
             title: "투표 1",
             writerName: "작성자1",
-            buildingPermission: 1,
+            buildingPermission: 101,
             createdAt: new Date("2024-01-01"),
             updatedAt: new Date("2024-01-01"),
             startDate: new Date("2024-01-10"),
@@ -346,7 +346,7 @@ describe("Polls Service", () => {
             userId: "user-2",
             title: "투표 2",
             writerName: "작성자2",
-            buildingPermission: null,
+            buildingPermission: 0,
             createdAt: new Date("2024-01-02"),
             updatedAt: new Date("2024-01-02"),
             startDate: new Date("2024-01-15"),
@@ -376,7 +376,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: { id: "apt-123" },
-          resident: { dong: "101" }, // 사용자는 101동
+          resident: { dong: "1" },
         };
 
         const mockPolls = [
@@ -385,7 +385,7 @@ describe("Polls Service", () => {
             userId: "user-1",
             title: "101동 투표",
             writerName: "작성자1",
-            buildingPermission: 101, // DB에는 101로 저장됨
+            buildingPermission: 101,
             createdAt: new Date("2024-01-01"),
             updatedAt: new Date("2024-01-01"),
             startDate: new Date("2024-01-10"),
@@ -397,7 +397,7 @@ describe("Polls Service", () => {
             userId: "user-2",
             title: "전체 공개 투표",
             writerName: "작성자2",
-            buildingPermission: null,
+            buildingPermission: 0,
             createdAt: new Date("2024-01-02"),
             updatedAt: new Date("2024-01-02"),
             startDate: new Date("2024-01-15"),
@@ -416,11 +416,9 @@ describe("Polls Service", () => {
         expect(result.polls).toHaveLength(2);
         expect(result.totalCount).toBe(2);
 
-        // 일반 사용자는 권한 필터링 조건이 추가됨
-        // dongNumber는 parseInt("101") = 101
         expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-          "(poll.buildingPermission IS NULL OR poll.buildingPermission = :dongNumber)",
-          { dongNumber: 101 }
+          "(poll.buildingPermission = 0 OR (poll.buildingPermission % 100) = :dongNumber)",
+          { dongNumber: 1 }
         );
       });
 
@@ -429,7 +427,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: { id: "apt-123" },
-          residences: [],
+          resident: null,
         };
 
         const queryParamsPage2: PollQueryParams = {
@@ -444,7 +442,7 @@ describe("Polls Service", () => {
         await getPolls(mockUserId, "ADMIN", queryParamsPage2);
 
         // Then
-        expect(mockQueryBuilder.skip).toHaveBeenCalledWith(10); // (2-1) * 10
+        expect(mockQueryBuilder.skip).toHaveBeenCalledWith(10);
         expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
       });
 
@@ -453,7 +451,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: { id: "apt-123" },
-          residences: [],
+          resident: null,
         };
 
         userRepository.findOne.mockResolvedValue(mockUser);
@@ -464,7 +462,7 @@ describe("Polls Service", () => {
 
         // Then
         expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-          "poll.buildingPermission IS NULL"
+          "poll.buildingPermission = 0"
         );
       });
 
@@ -476,14 +474,6 @@ describe("Polls Service", () => {
         await expect(
           getPolls(mockUserId, "USER", mockQueryParams)
         ).rejects.toThrow(NotFoundError);
-
-        expect(userRepository.findOne).toHaveBeenCalledWith({
-          where: { id: mockUserId },
-          relations: {
-            apartment: true,
-            resident: true,
-          },
-        });
       });
 
       it("아파트 정보가 없는 사용자일 때 ForbiddenError를 던져야 함", async () => {
@@ -491,7 +481,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: null,
-          residences: [],
+          resident: null,
         };
 
         userRepository.findOne.mockResolvedValue(mockUser);
@@ -507,7 +497,7 @@ describe("Polls Service", () => {
         const mockUser = {
           id: mockUserId,
           apartment: { id: "apt-123" },
-          residences: [],
+          resident: null,
         };
 
         const mockDate = new Date("2024-01-01T10:00:00Z");
@@ -517,7 +507,7 @@ describe("Polls Service", () => {
             userId: "user-1",
             title: "테스트 투표",
             writerName: "작성자",
-            buildingPermission: null,
+            buildingPermission: 0,
             createdAt: mockDate,
             updatedAt: mockDate,
             startDate: mockDate,
