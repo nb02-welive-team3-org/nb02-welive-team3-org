@@ -183,14 +183,15 @@ export const getPolls = async (
         : null;
 
       if (userDongNumber) {
+        // buildingPermission이 0(전체 공개) 또는
         // buildingPermission이 null(전체) 또는 사용자의 동 번호와 일치하는 투표만
         queryBuilder.andWhere(
-          "(poll.buildingPermission IS NULL OR poll.buildingPermission = :dongNumber)",
+          "(poll.buildingPermission = 0 OR (poll.buildingPermission % 100) = :dongNumber)",
           { dongNumber: userDongNumber }
         );
       } else {
         // 거주지 정보가 없으면 전체 공개 투표만
-        queryBuilder.andWhere("poll.buildingPermission IS NULL");
+        queryBuilder.andWhere("poll.buildingPermission = 0");
       }
     }
     // ADMIN이나 SUPER_ADMIN은 모든 투표 조회 가능
