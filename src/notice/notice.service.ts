@@ -10,23 +10,13 @@ import { NoticeListqueryDto } from "./dto/list-notice.query.dto";
 import { User } from "../entities/user.entity";
 import { NoticeDetailResponseDto } from "./dto/notifications-read.response.dto";
 import { _date } from "zod/v4/core";
-// import { CommentResponseDto } from './dto/create-comment.dto' // 파일 없어서 주석 처리
+import { CommentResponseDto } from '../notice/notice-comments/create-comment.response.dto' // 파일 없어서 주석 처리
 import { UpdateRequestDto } from "./dto/update-notice.request.dto";
 import { UpdateResponseSchema } from "./dto/update-notice.response.dto";
 import {
   DeleteNoticeRequestDtoType,
   DeleteNoticeResponseDto,
 } from "./dto/delete-notice.dto";
-
-// CommentResponseDto 타입 정의 (댓글 응답용) // create-comment.dto 파일이 없어서 여기에 정의함
-interface CommentResponseDto {
-  id: string;
-  userId: string;
-  writerName: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 //공지사항 생성 서비스
 export const createNotice = async (data: CreateNoticeRequestDto) => {
@@ -69,7 +59,9 @@ export const ListNotice = async (
   query: NoticeListqueryDto
 ): Promise<NoticeListResponseDto> => {
   const noticeRepo = AppDataSource.getRepository(Notice);
-  const [notices, _] = await noticeRepo.findAndCount({
+
+  // ✅ totalCount 변수에 전체 개수 저장!
+  const [notices, totalCount] = await noticeRepo.findAndCount({
     skip: (query.page - 1) * query.limit,
     take: query.limit,
     where: [
@@ -111,9 +103,8 @@ export const ListNotice = async (
 
   const response: NoticeListResponseDto = {
     items: data,
-    totalCount: data.length,
+    totalCount: totalCount, // ✅ data.length → totalCount로 변경!
   };
-
   return response;
 };
 
@@ -214,3 +205,8 @@ export const DeleteNotice = async (data: DeleteNoticeRequestDtoType) => {
     throw new Error("삭제할 공지사항이 존재하지 않습니다.");
   }
 };
+
+
+
+
+
