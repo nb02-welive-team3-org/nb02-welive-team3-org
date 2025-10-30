@@ -18,18 +18,32 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies and build
+      - name: Cache Node Modules
+        id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-deps-
+
+      - name: Build and Prepare Express App
         run: |
           npm ci
           npm run build
+          echo "===== VERIFY BUILD OUTPUT ====="
+          grep "File" dist/users/users.dto.js || echo "No 'File' reference found in built code."
+          ls -al dist || echo "dist not found"
+          du -sh node_modules || echo "no node_modules"
 
-      - name: Copy build files to EC2
+      - name: Copy Build + node_modules to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
-          source: "dist,package.json,package-lock.json,deploy"
+          timeout: 20m
+          source: "dist,node_modules,package.json,package-lock.json,deploy"
           target: /home/ubuntu/welive
 
       - name: Create .env file on EC2
@@ -58,48 +72,46 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
             EOF
 
-      - name: Configure Nginx on EC2 (HTTP/HTTPS switch)
+      - name: Configure Nginx and Ensure SSL Certificate
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
           script: |
-            if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
-              sudo mv /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+            CERT_DOMAIN="api.welive-test.online"
+            NGINX_SITE="/etc/nginx/sites-available/welive"
+            API_PATH="/home/ubuntu/welive/deploy"
+
+            sudo apt update -y
+            sudo apt install -y nginx certbot python3-certbot-nginx
+
+            if [ -d "/etc/letsencrypt/live/${CERT_DOMAIN}" ]; then
+              sudo cp "${API_PATH}/nginx-https.conf" "${NGINX_SITE}"
             else
-              sudo mv /home/ubuntu/welive/deploy/nginx-http.conf /etc/nginx/sites-available/welive
+              sudo cp "${API_PATH}/nginx-http.conf" "${NGINX_SITE}"
             fi
-            sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
+
+            sudo ln -sf "${NGINX_SITE}" /etc/nginx/sites-enabled/welive
             sudo rm -f /etc/nginx/sites-enabled/default
             sudo nginx -t && sudo systemctl reload nginx
 
-      - name: Ensure Certbot and HTTPS setup
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST_TEST }}
-          username: ${{ secrets.EC2_USER_TEST }}
-          key: ${{ secrets.EC2_KEY_TEST }}
-          script: |
-            sudo apt update -y
-            sudo apt install -y certbot python3-certbot-nginx
-            if [ ! -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
-              sudo certbot certonly --nginx -d api.welive-test.online --non-interactive --agree-tos -m admin@welive-test.online
-              sudo mv /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
-              sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
-              sudo nginx -t && sudo systemctl reload nginx
-            else
-              echo "SSL certificate already exists, skipping issue."
+            if [ ! -d "/etc/letsencrypt/live/${CERT_DOMAIN}" ]; then
+              sudo certbot certonly --nginx -d "${CERT_DOMAIN}" --non-interactive --agree-tos -m admin@welive-test.online
+              if [ -d "/etc/letsencrypt/live/${CERT_DOMAIN}" ]; then
+                sudo cp "${API_PATH}/nginx-https.conf" "${NGINX_SITE}"
+                sudo nginx -t && sudo systemctl reload nginx
+              fi
             fi
 
-      - name: Restart TypeScript Express app with PM2
+      - name: Start Express server with PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
+          command_timeout: 3m
           script: |
             cd /home/ubuntu/welive
-            npm ci --omit=dev
             pm2 restart welive-test || pm2 start dist/app.js --name welive-test
             pm2 save
