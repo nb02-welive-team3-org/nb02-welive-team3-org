@@ -1,22 +1,16 @@
-import { ILike } from "typeorm";
-import { CreateNoticeRequestDto } from "./dto/create-notice.dto";
-import { AppDataSource } from "../config/data-source";
-import { Notice, NoticeCategory } from "../entities/notice.entity";
-import {
-  NoticeListResponseDto,
-  NoticeListItemDto,
-} from "./dto/list-notice.query.dto";
-import { NoticeListqueryDto } from "./dto/list-notice.query.dto";
-import { User } from "../entities/user.entity";
-import { NoticeDetailResponseDto } from "./dto/notifications-read.response.dto";
-import { _date } from "zod/v4/core";
-import { CommentResponseDto } from '../notice/notice-comments/create-comment.response.dto' // 파일 없어서 주석 처리
-import { UpdateRequestDto } from "./dto/update-notice.request.dto";
-import { UpdateResponseSchema } from "./dto/update-notice.response.dto";
-import {
-  DeleteNoticeRequestDtoType,
-  DeleteNoticeResponseDto,
-} from "./dto/delete-notice.dto";
+import { ILike } from 'typeorm';
+import { CreateNoticeRequestDto } from './dto/create-notice.dto';
+import { AppDataSource } from '../config/data-source';
+import { Notice, NoticeCategory } from '../entities/notice.entity';
+import { NoticeListResponseDto, NoticeListItemDto } from './dto/list-notice.query.dto';
+import { NoticeListqueryDto } from './dto/list-notice.query.dto';
+import { User } from '../entities/user.entity';
+import { NoticeDetailResponseDto } from './dto/notifications-read.response.dto';
+import { _date } from 'zod/v4/core';
+import { UpdateRequestDto } from './dto/update-notice.request.dto';
+import { UpdateResponseSchema } from './dto/update-notice.response.dto';
+import { DeleteNoticeRequestDtoType, DeleteNoticeResponseDto } from './dto/delete-notice.dto';
+import { CommentResponseDto } from './dto/create-comment.response.dto';
 
 //공지사항 생성 서비스
 export const createNotice = async (data: CreateNoticeRequestDto) => {
@@ -36,9 +30,7 @@ export const createNotice = async (data: CreateNoticeRequestDto) => {
 };
 
 // Poll Scheduler용 공지사항 생성 함수 (userId 포함)
-export const createNoticeWithUserId = async (
-  data: CreateNoticeRequestDto & { userId: string }
-) => {
+export const createNoticeWithUserId = async (data: CreateNoticeRequestDto & { userId: string }) => {
   const noticeRepo = AppDataSource.getRepository(Notice);
   const target = noticeRepo.create({
     userId: data.userId,
@@ -55,9 +47,7 @@ export const createNoticeWithUserId = async (
   await noticeRepo.save(target);
 };
 
-export const ListNotice = async (
-  query: NoticeListqueryDto
-): Promise<NoticeListResponseDto> => {
+export const ListNotice = async (query: NoticeListqueryDto): Promise<NoticeListResponseDto> => {
   const noticeRepo = AppDataSource.getRepository(Notice);
 
   // ✅ totalCount 변수에 전체 개수 저장!
@@ -88,7 +78,7 @@ export const ListNotice = async (
         userId: value.userId,
         category: value.category,
         title: value.title,
-        writerName: targetUser ? targetUser.name : "",
+        writerName: targetUser ? targetUser.name : '',
         isPinned: value.isPinned,
         boardId: value.boardId,
         viewsCount: value.viewsCount,
@@ -108,9 +98,7 @@ export const ListNotice = async (
   return response;
 };
 
-export const NoticeDetail = async (
-  noticeId: string
-): Promise<NoticeDetailResponseDto> => {
+export const NoticeDetail = async (noticeId: string): Promise<NoticeDetailResponseDto> => {
   const noticeRepo = AppDataSource.getRepository(Notice);
   const value = await noticeRepo.findOne({
     where: {
@@ -121,7 +109,7 @@ export const NoticeDetail = async (
     },
   });
   if (!value) {
-    throw "Not Found";
+    throw 'Not Found';
   }
 
   const userRepo = AppDataSource.getRepository(User);
@@ -148,7 +136,7 @@ export const NoticeDetail = async (
     userId: value.userId,
     category: value.category,
     title: value.title,
-    writerName: targetUser ? targetUser.name : "",
+    writerName: targetUser ? targetUser.name : '',
     isPinned: value.isPinned,
     boardId: value.boardId,
     viewsCount: value.viewsCount,
@@ -158,7 +146,7 @@ export const NoticeDetail = async (
     createdAt: value.createdAt.toISOString(),
     updatedAt: value.updatedAt.toISOString(),
     content: value.content,
-    boardName: "NOTICE",
+    boardName: 'NOTICE',
     comments: comments,
   };
   return data;
@@ -199,14 +187,9 @@ export const DeleteNotice = async (data: DeleteNoticeRequestDtoType) => {
     // 삭제가 정상 처리되었으면 성공 메시지 반환
     console.log(Notice);
     return DeleteNoticeResponseDto.parse({
-      message: "공지사항이 정상적으로 삭제 되었습니다.",
+      message: '공지사항이 정상적으로 삭제 되었습니다.',
     });
   } else {
-    throw new Error("삭제할 공지사항이 존재하지 않습니다.");
+    throw new Error('삭제할 공지사항이 존재하지 않습니다.');
   }
 };
-
-
-
-
-
