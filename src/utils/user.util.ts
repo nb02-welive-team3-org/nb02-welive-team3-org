@@ -11,5 +11,6 @@ export const getUser = (req: Request): Payload => {
   throw new UnauthorizedError();
 };
 export const setUser = (req: Request, user: Payload): Payload => (req.user = user);
+export const isUser = (user: Payload): boolean => user.role === UserRole.USER;
 export const isUserAdmin = (user: Payload): boolean => user.role === UserRole.ADMIN;
 export const isUserSuperAdmin = (user: Payload): boolean => user.role === UserRole.SUPER_ADMIN;

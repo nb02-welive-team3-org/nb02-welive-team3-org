@@ -151,7 +151,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
     isActive: loggedinUser.isActive,
     apartmentId: loggedinUser.apartmentId,
     apartmentName: loggedinUser.apartment?.name || null,
-    residentDong: loggedinUser.resident?.dong || null,
+    residentDong: loggedinUser.resident?.building || null,
     boardIds: {
       COMPLAINT: loggedinUser.apartment?.complaintBoard?.id || null,
       NOTICE: loggedinUser.apartment?.noticeBoard?.id || null,
