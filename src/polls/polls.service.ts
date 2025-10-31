@@ -180,17 +180,6 @@ export const getPolls = async (
       const userDongNumber = user.resident
         ? parseInt(user.resident.dong || user.resident.building)
         : null;
-      // 디버깅 로그 추가
-      console.log("=== 투표 필터링 디버깅 ===");
-      console.log("user.id:", user.id);
-      console.log("user.name:", user.name);
-      console.log("user.resident:", user.resident);
-      console.log("user.resident.dong:", user.resident?.dong);
-      console.log("userDongNumber:", userDongNumber);
-      console.log(
-        "userDongNumber % 100:",
-        userDongNumber ? userDongNumber % 100 : null
-      );
 
       if (userDongNumber) {
         // 두 가지 저장 방식 모두 지원
@@ -318,19 +307,40 @@ export const getPollDetail = async (
 
   // 일반 사용자(USER)인 경우 권한 확인
   if (userRole === UserRole.USER) {
-    // buildingPermission이 설정된 경우, 해당 동 거주자만 조회 가능
-    if (
-      poll.buildingPermission !== undefined &&
-      poll.buildingPermission !== null
-    ) {
-      const userDong = user.resident ? parseInt(user.resident.dong) : null;
+    // 사용자의 동 번호 (dong 또는 building 필드 사용)
+    const userDongNumber = user.resident
+      ? parseInt(user.resident.dong || user.resident.building)
+      : null;
 
-      if (!userDong || userDong !== poll.buildingPermission) {
+    if (userDongNumber) {
+      // buildingPermission이 0(전체) 또는 null(전체)이 아니면 권한 체크
+      if (
+        poll.buildingPermission !== undefined &&
+        poll.buildingPermission !== null &&
+        poll.buildingPermission !== 0
+      ) {
+        // 사용자의 동과 일치하는지 확인 (직접 비교 또는 % 100 비교)
+        const isAuthorized =
+          poll.buildingPermission === userDongNumber ||
+          poll.buildingPermission % 100 === userDongNumber % 100;
+
+        if (!isAuthorized) {
+          throw new ForbiddenError("해당 투표를 조회할 권한이 없습니다.");
+        }
+      }
+    } else {
+      // 거주지 정보가 없으면 전체 공개만 가능
+      if (
+        poll.buildingPermission !== undefined &&
+        poll.buildingPermission !== null &&
+        poll.buildingPermission !== 0
+      ) {
         throw new ForbiddenError("해당 투표를 조회할 권한이 없습니다.");
       }
     }
-    // buildingPermission이 null이면 전체 입주민 조회 가능
   }
+  // buildingPermission이 null이면 전체 입주민 조회 가능
+
   // ADMIN이나 SUPER_ADMIN은 모든 투표 조회 가능
 
   // 옵션 정보를 OptionResponse 형태로 변환
