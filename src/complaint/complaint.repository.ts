@@ -1,27 +1,29 @@
 import { AppDataSource } from "../config/data-source";
 import { Complaint, ComplaintStatus } from "../entities/complaint.entity";
-import { CreateComplaintInput, UpdateComplaintInput, UpdateComplaintStatusInput } from "./complaint.schema";
+import {
+  CreateComplaintInput,
+  UpdateComplaintInput,
+  UpdateComplaintStatusInput,
+} from "./complaint.schema";
 
 const complaintRepository = AppDataSource.getRepository(Complaint);
 
 export async function createComplaint(data: CreateComplaintInput & { userId: string }) {
   const complaintData = {
     ...data,
-    status: data.status ? (data.status as ComplaintStatus) : ComplaintStatus.PENDING,
+    status: data.status || ComplaintStatus.PENDING,
   };
   return await complaintRepository.save(complaintData);
 }
 
 export async function getComplaints(page: number, limit: number) {
   const skip = (page - 1) * limit;
-
   const [complaints, totalCount] = await complaintRepository.findAndCount({
     skip,
     take: limit,
     order: { createdAt: "DESC" },
     relations: ["user"],
   });
-
   return { complaints, totalCount };
 }
 

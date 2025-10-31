@@ -32,8 +32,8 @@ export class Complaint {
   userId!: string;
 
   @ManyToOne(() => ComplaintBoard, (board) => board.complaints, {
-    nullable: true,
-    onDelete: 'SET NULL',
+  nullable: true,
+  onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'board_id' })
   complaintBoard?: ComplaintBoard | null;
@@ -42,8 +42,6 @@ export class Complaint {
     name: 'board_id',
     type: 'uuid',
     nullable: true,
-    insert: false,
-    update: false,
   })
   boardId?: string | null;
 
@@ -72,17 +70,11 @@ export class Complaint {
   @Column({ nullable: true })
   ho?: string;
 
-  /**
-   * 댓글(Comment)
-   */
   @OneToMany(() => Comment, (comment) => comment.complaint, {
     cascade: true,
   })
   comments!: Comment[];
 
-  /**
-   * 알림(Notification)
-   */
   @OneToMany(() => Notification, (notification) => notification.complaint, {
     cascade: true,
   })
