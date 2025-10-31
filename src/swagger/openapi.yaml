@@ -7,10 +7,30 @@ info:
 tags:
   - name: Auth
     description: 인증 관리
+  - name: Users
+    description: 사용자 관리
+  - name: Apartments
+    description: 아파트 관리
+  - name: Residents
+    description: 입주민 관리
+  - name: Complaints
+    description: 민원 관리
+  - name: Polls
+    description: 투표 관리
+  - name: Notices
+    description: 공지사항 관리
+  - name: Comments
+    description: 댓글 관리
+  - name: Notifications
+    description: 알림 관리
+  - name: Health
+    description: 헬스 체크
+  - name: Pollsvotes
+    description: 투표
+  - name: Poll Scheduler
 
 components:
   schemas:
-    # 일반 회원가입 요청
     SignupRequest:
       type: object
       properties:
@@ -53,7 +73,6 @@ components:
         - apartmentDong
         - apartmentHo
 
-    # 일반 회원가입 응답
     SignupResponse:
       type: object
       properties:
@@ -85,7 +104,6 @@ components:
         - joinStatus
         - isActive
 
-    # 관리자 회원가입 요청
     SignupAdminRequest:
       type: object
       properties:
@@ -155,7 +173,6 @@ components:
         - apartmentAddress
         - apartmentManagementNumber
 
-    # 관리자 회원가입 응답
     SignupAdminResponse:
       type: object
       properties:
@@ -187,7 +204,6 @@ components:
         - joinStatus
         - isActive
 
-    # 슈퍼 관리자 회원가입 요청
     SignupSuperAdminRequest:
       type: object
       properties:
@@ -205,7 +221,7 @@ components:
           example: 홍길
         email:
           type: string
-          example: superadmin@example.com
+          example: superadmin1@example.com
         role:
           type: string
           enum: [USER, ADMIN, SUPER_ADMIN]
@@ -222,7 +238,6 @@ components:
         - email
         - role
 
-    # 슈퍼 관리자 회원가입 응답
     SignupSuperAdminResponse:
       type: object
       properties:
@@ -253,6 +268,798 @@ components:
         - role
         - joinStatus
         - isActive
+
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: adminuser01
+        password:
+          type: string
+          example: AdminPass123!
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "019a32a4-1d36-74d2-9fbd-0a28c2d6ff9c"
+        name:
+          type: string
+          example: "홍길동"
+        email:
+          type: string
+          example: "admin@example.com"
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          example: ADMIN
+        joinStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+          example: APPROVED
+        isActive:
+          type: boolean
+          example: true
+        apartmentId:
+          type: string
+          example: "apt-001"
+        apartmentName:
+          type: string
+          example: "위리브 아파트"
+        residentDong:
+          type: string
+          example: "101"
+        boardIds:
+          type: object
+          properties:
+            COMPLAINT:
+              type: string
+              nullable: true
+              example: "board-001"
+            NOTICE:
+              type: string
+              nullable: true
+              example: "board-002"
+            POLL:
+              type: string
+              nullable: true
+              example: "board-003"
+          required:
+            - COMPLAINT
+            - NOTICE
+            - POLL
+        username:
+          type: string
+          example: "adminuser01"
+        contact:
+          type: string
+          example: "01098765432"
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.png"
+      required:
+        - id
+        - name
+        - email
+        - role
+        - joinStatus
+        - isActive
+        - apartmentId
+        - apartmentName
+        - residentDong
+        - boardIds
+        - username
+        - contact
+        - avatar
+
+    RefreshResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "토큰이 성공적으로 갱신되었습니다."
+      required:
+        - message
+
+    DeleteAdminResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "작업이 성공적으로 완료되었습니다"
+      required:
+        - message
+
+    CleanupResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "작업이 성공적으로 완료되었습니다"
+      required:
+        - message
+
+    UserUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "홍길동님의 정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요."
+      required:
+        - message
+
+    ApartmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "019752f2-d1d3-771f-ae1c-1db22e1618f0"
+        name:
+          type: string
+          example: "위리브 아파트"
+        address:
+          type: string
+          example: "서울시 강남구 역삼동 123-45"
+        officeNumber:
+          type: string
+          nullable: true
+          example: "02-123-4567"
+        description:
+          type: string
+          nullable: true
+          example: "강남구 역삼동에 위치한 아파트입니다."
+        startComplexNumber:
+          type: integer
+          nullable: true
+          example: 1
+        endComplexNumber:
+          type: integer
+          nullable: true
+          example: 10
+        startDongNumber:
+          type: integer
+          nullable: true
+          example: 1
+        endDongNumber:
+          type: integer
+          nullable: true
+          example: 10
+        startFloorNumber:
+          type: integer
+          nullable: true
+          example: 1
+        endFloorNumber:
+          type: integer
+          nullable: true
+          example: 20
+        startHoNumber:
+          type: integer
+          nullable: true
+          example: 101
+        endHoNumber:
+          type: integer
+          nullable: true
+          example: 105
+        apartmentStatus:
+          type: string
+          example: PENDING
+        adminId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "019752f2-d1d3-771f-ae1c-1db22e1618f0"
+        adminName:
+          type: string
+          nullable: true
+          example: "홍길동"
+        adminContact:
+          type: string
+          nullable: true
+          example: "01098765432"
+        adminEmail:
+          type: string
+          format: email
+          nullable: true
+          example: "admin@example.com"
+        pollBoardId:
+          type: string
+          format: uuid
+          nullable: true
+
+    ResidentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        building:
+          type: string
+          example: 101
+        unitNumber:
+          type: string
+          example: 201
+        contact:
+          type: string
+          example: "01012345678"
+        name:
+          type: string
+          example: 홍길동
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "admin@example.com"
+        residenceStatus:
+          type: string
+          enum: [RESIDENCE, NO_RESIDENCE]
+          example: RESIDENCE
+        isHouseholder:
+          type: string
+          enum: [HOUSEHOLDER, MEMBER]
+          example: HOUSEHOLDER
+        isRegistered:
+          type: boolean
+          example: true
+        approvalStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, NEED_UPDATE]
+          example: APPROVED
+      required:
+        - id
+        - building
+        - unitNumber
+        - contact
+        - name
+        - residenceStatus
+        - isHouseholder
+        - isRegistered
+        - approvalStatus
+
+    ResidentsListResponse:
+      type: object
+      properties:
+        residents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResidentResponse"
+        message:
+          type: string
+        count:
+          type: integer
+      required:
+        - residents
+        - message
+        - count
+        
+    CreateComplaintInput:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        isPublic:
+          type: boolean
+        boardId:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, RESOLVED]
+
+    UpdateComplaintInput:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        isPublic:
+          type: boolean
+
+    UpdateComplaintStatusInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, RESOLVED]
+
+    ComplaintDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        isPublic:
+          type: boolean
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, RESOLVED]
+        userId:
+          type: string
+        boardId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ComplaintListResponse:
+      type: object
+      properties:
+        complaints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDetail'
+        totalCount:
+          type: integer
+          example: 10
+    
+    CreatePollDto:
+      type: object
+      required:
+        - boardId
+        - title
+        - content
+        - startDate
+        - endDate
+        - options
+      properties:
+        boardId:
+          type: string
+          format: uuid
+          description: "게시판 ID (민원, 투표, 공지 중 하나)"
+        title:
+          type: string
+        content:
+          type: string
+        buildingPermission:
+          type: integer
+          description: "0이면 전체 공개"
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, CLOSED]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+
+    PollListItemDto:
+      type: object
+      properties:
+        pollId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        title:
+          type: string
+        writerName:
+          type: string
+        buildingPermission:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, CLOSED]
+
+    PollsListWrapperDto:
+      type: object
+      properties:
+        polls:
+          type: array
+          items:
+            $ref: '#/components/schemas/PollListItemDto'
+        totalCount:
+          type: integer
+
+    PollDetailResponseDto:
+      type: object
+      properties:
+        pollId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        writerName:
+          type: string
+        buildingPermission:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, CLOSED]
+        content:
+          type: string
+        boardName:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              voteCount:
+                type: integer
+
+    UpdatePollDto:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        buildingPermission:
+          type: integer
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, CLOSED]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+
+    CreateNoticeRequestDto:
+      type: object
+      required:
+        - category
+        - title
+        - content
+        - boardId
+      properties:
+        category:
+          type: string
+          description: 공지 분류
+          enum:
+            - MAINTENANCE
+            - EMERGENCY
+            - COMMUNITY
+            - RESIDENT_VOTE
+            - RESIDENT_COUNCIL
+            - ETC
+          example: MAINTENANCE
+        title:
+          type: string
+          description: 공지 제목
+          example: 승강기 정기점검에 따른 일시 운행 중단 안내
+        content:
+          type: string
+          description: 공지 내용
+          example: 매월 실시하는 승강기 정기점검 관계로 아래와 같이 각 승강기별로 일시 운행 중단됩니다.
+        boardId:
+          type: string
+          format: uuid
+          description: 게시판의 고유 ID (민원, 투표, 공지 중 하나)
+          example: 019762dc-db8f-7090-9bbc-020c66b94d88
+        isPinned:
+          type: boolean
+          description: 상단 고정 여부
+          example: false
+        startDate:
+          type: string
+          format: date-time
+          description: 공지 시작일
+          example: 2025-06-01T00:00:00Z
+        endDate:
+          type: string
+          format: date-time
+          description: 공지 종료일
+          example: 2025-06-10T00:00:00Z
+
+    # 공지사항 목록 
+    NoticeListItemDto:
+      type: object
+      properties:
+        noticeId:
+          type: string
+          format: uuid
+          description: 공지사항 ID
+          example: 019762dc-db8f-7090-9bbc-020c66b94d88
+        userId:
+          type: string
+          format: uuid
+          description: 작성자 ID
+          example: 01973e8d-b532-78d2-9044-7b512025efd9
+        category:
+          type: string
+          description: 공지 분류
+          example: MAINTENANCE
+        title:
+          type: string
+          example: 현관문 도어락이 고장났어요
+        writerName:
+          type: string
+          example: 김세대
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-06-04T08:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-06-08T08:30:00Z
+        viewsCount:
+          type: integer
+          example: 26
+        commentsCount:
+          type: integer
+          example: 3
+        isPinned:
+          type: boolean
+          example: true
+
+    # 공지사항 목록 응답
+    NoticeListResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 공지사항 목록
+          items:
+            $ref: '#/components/schemas/NoticeListItemDto'
+        totalCount:
+          type: integer
+          description: 전체 공지사항 개수
+          example: 42
+
+    # 공지사항 댓글 DTO
+    CommentResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 019757e2-5538-7b31-aee3-ce29e2a095e8
+        userId:
+          type: string
+          format: uuid
+          example: 01973e8d-b532-78d2-9044-7b512025efd9
+        writerName:
+          type: string
+          example: 워그레이몬
+        content:
+          type: string
+          example: 수정된 댓글 내용입니다.
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-06-19T14:12:14.396Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-06-20T03:29:00.000Z
+
+    # 공지사항 상세 조회
+    NoticeDetailResponseDto:
+      type: object
+      properties:
+        noticeId:
+          type: string
+          format: uuid
+          example: 019762dc-db8f-7090-9bbc-020c66b94d88
+        userId:
+          type: string
+          format: uuid
+          example: 01973e8d-b532-78d2-9044-7b512025efd9
+        category:
+          type: string
+          example: MAINTENANCE
+        title:
+          type: string
+          example: 현관문 도어락이 고장났어요
+        writerName:
+          type: string
+          example: 김세대
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-06-04T08:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-06-08T08:30:00Z
+        viewsCount:
+          type: integer
+          example: 26
+        commentsCount:
+          type: integer
+          example: 3
+        isPinned:
+          type: boolean
+          example: true
+        content:
+          type: string
+          example: 도어락 비밀번호가 눌러지지 않습니다. 빠른 수리 부탁드립니다.
+        boardName:
+          type: string
+          example: 공지사항
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResponseDto'
+
+    UpdateNoticeRequestDto:
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+            - MAINTENANCE
+            - EMERGENCY
+            - COMMUNITY
+            - RESIDENT_VOTE
+            - RESIDENT_COUNCIL
+            - ETC
+        title:
+          type: string
+        content:
+          type: string
+        boardId:
+          type: string
+          format: uuid
+        isPinned:
+          type: boolean
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+      example:
+        category: "GENERAL"
+        title: "관리비 납부 안내 (수정)"
+        content: "납부 기한이 연장되었습니다."
+        boardId: "uuid-boardId"
+        isPinned: true
+        startDate: "2025-06-02T00:00:00Z"
+        endDate: "2025-06-12T00:00:00Z"  
+    
+    NotificationResponseDto:
+      type: object
+      properties:
+        notificationId:
+          type: string
+          format: uuid
+          description: 알림 ID
+        content:
+          type: string
+          description: 알림 내용
+        notificationType:
+          type: string
+          enum: [GENERAL, SIGNUP_REQ, COMPLAINT_REQ,COMPLAINT_IN_PROGRESS,COMPLAINT_RESOLVED, COMPLAINT_REJECTED, NOTICE_REG, POLL_REG, POLL_CLOSED, POLL_RESULT, SYSTEM, TEST ]
+          description: 알림 유형
+        notifiedAt:
+          type: string
+          format: date-time
+          description: 알림 생성 시각 (ISO 8601)
+        isChecked:
+          type: boolean
+          description: 읽음 여부
+        complaintId:
+          type: string
+          nullable: true
+          description: 관련 민원 ID (해당되는 경우)
+        noticeId:
+          type: string
+          nullable: true
+          description: 관련 공지사항 ID (해당되는 경우)
+        pollId:
+          type: string
+          nullable: true
+          description: 관련 투표 ID (해당되는 경우)
+
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: 서버 상태
+          example: "ok"
+
+    VoteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "투표가 성공적으로 등록되었습니다."
+        updatedOption:
+          $ref: '#/components/schemas/OptionResult'
+        winnerOption:
+          $ref: '#/components/schemas/OptionResult'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionResult'
+
+    VoteDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "투표가 성공적으로 취소되었습니다."
+        updatedOption:
+          $ref: '#/components/schemas/OptionResult'
+
+    OptionResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        votes:
+          type: integer
+          example: 10
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 paths:
   /api/auth/signup:
@@ -301,13 +1108,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/SignupAdminResponse"
         "400":
-          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.
+          description: 잘못된 요청
         "403":
-          description: 접근 권한이 없습니다(이미 로그인 상태이거나 비활성화된 계정입니다).
+          description: 접근 권한 없음
         "409":
-          description: 이미 사용 중인 정보(아이디, 이메일, 전화번호)입니다.
+          description: 중복된 정보
         "500":
-          description: 회원가입을 진행하는 중 오류가 발생했습니다.
+          description: 서버 에러
 
   /api/auth/signup/super-admin:
     post:
@@ -328,10 +1135,1790 @@ paths:
               schema:
                 $ref: "#/components/schemas/SignupSuperAdminResponse"
         "400":
-          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.
+          description: 잘못된 요청
         "403":
-          description: 접근 권한이 없습니다(이미 로그인 상태이거나 비활성화된 계정입니다).
+          description: 접근 권한 없음
         "409":
-          description: 이미 사용 중인 정보(아이디, 이메일, 전화번호)입니다.
+          description: 중복된 정보
         "500":
-          description: 회원가입을 진행하는 중 오류가 발생했습니다.
+          description: 서버 에러
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: "[모든 사용자]로그인"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: 인증 실패
+        "403":
+          description: 접근 권한 없음
+        "500":
+          description: 서버 에러
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: "[모든 사용자]로그아웃"
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: 로그아웃 성공
+        "401":
+          description: 인증 실패
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: "[모든 사용자]토큰 갱신"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 토큰이 성공적으로 갱신되었습니다
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResponse"
+        "401":
+          description: 갱신 실패
+        "404":
+          description: 존재하지 않는 사용자입니다
+
+  /api/auth/admins/{adminId}/status:
+    patch:
+      tags:
+        - Auth
+      summary: "[슈퍼 관리자] 관리자 가입 상태 변경(단건)"
+      parameters:
+        - in: path
+          name: adminId
+          schema:
+            type: string
+          required: true
+          description: 관리자 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, APPROVED, REJECTED]
+                  example: APPROVED
+      responses:
+        "200":
+          description: 관리자 가입 상태 변경 완료되었습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다
+        "404":
+          description: 존재하지 않는 관리자입니다
+        "500":
+          description: 서버 오류
+
+  /api/auth/admins/status:
+    patch:
+      tags:
+        - Auth
+      summary: "[슈퍼 관리자] 관리자 가입 상태 일괄 변경"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, APPROVED, REJECTED]
+                  example: APPROVED
+      responses:
+        "200":
+          description: 관리자 가입 상태 일괄 변경이 완료되었습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다
+        "404":
+          description: 존재하는 관리자가 없습니다
+        "500":
+          description: 서버 오류
+
+  /api/auth/residents/{residentId}/status:
+    patch:
+      tags:
+        - Auth
+      summary: "[관리자] 주민 가입 상태 변경(단건)"
+      parameters:
+        - in: path
+          name: residentId
+          schema:
+            type: string
+          required: true
+          description: 주민 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, APPROVED, REJECTED]
+                  example: APPROVED
+      responses:
+        "200":
+          description: 주민 가입 상태 변경 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다
+        "500":
+          description: 서버 오류
+
+  /api/auth/residents/status:
+    patch:
+      tags:
+        - Auth
+      summary: "[관리자] 주민 가입 상태 일괄 변경"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, APPROVED, REJECTED]
+                  example: APPROVED
+      responses:
+        "200":
+          description: "[관리자] 주민 가입 상태 일괄 변경이 완료 되었습니다."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 잘못된 요청
+        "404":
+          description: 존재하는 주민이 없음
+        "500":
+          description: 서버 오류
+
+  /api/auth/admins/{adminId}:
+    patch:
+      tags:
+        - Auth
+      summary: "[슈퍼 관리자] 관리자 정보(아파트 정보) 수정"
+      parameters:
+        - in: path
+          name: adminId
+          schema:
+            type: string
+          required: true
+          description: 관리자 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact:
+                  type: string
+                  example: "01098765432"
+                email:
+                  type: string
+                  example: "admin@example.com"
+                description:
+                  type: string
+                  example: "관리자 설명"
+                apartmentName:
+                  type: string
+                  example: "위리브 아파트"
+                apartmentAddress:
+                  type: string
+                  example: "서울시 강남구 역삼동 123-45"
+                apartmentManagementNumber:
+                  type: string
+                  example: "001"
+      responses:
+        "200":
+          description: 관리자 정보(아파트 정보) 수정이 완료되었습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다
+        "404":
+          description: 존재하지 않는 관리자입니다
+        "409":
+          description: 이미 사용 중인 이메일 또는 전화번호입니다
+        "500":
+          description: 서버 오류
+
+    delete:
+      tags:
+        - Auth
+      summary: "[슈퍼 관리자] 관리자 정보(아파트 정보 포함) 삭제"
+      parameters:
+        - in: path
+          name: adminId
+          schema:
+            type: string
+          required: true
+          description: 관리자 ID
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 관리자 삭제 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteAdminResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)
+        "404":
+          description: 존재하지 않는 관리자
+        "500":
+          description: 서버 오류
+
+  /api/auth/cleanup:
+    post:
+      tags:
+        - Auth
+      summary: "[최고관리자/관리자] 거절 계정 관리(최고관리자는 관리자 계정을, 관리자는 사용자 계정을 일괄 정리합니다)"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 작업 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CleanupResponse"
+        "403":
+          description: 접근 권한이 없습니다
+        "500":
+          description: 서버 오류
+
+  /api/users/me:
+    patch:
+      tags:
+        - Users
+      summary: "[사용자] 유저 정보 수정"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                  description: "현재 비밀번호 (새 비밀번호 설정 시에만 필요)"
+                  example: "currentPassword123!"
+                newPassword:
+                  type: string
+                  description: "새 비밀번호 (비밀번호 변경 시에만 필요)"
+                  example: "newPassword456!"
+                file:
+                  type: string
+                  format: binary
+                  description: "아바타 이미지 파일 (선택사항, 비밀번호 없이도 업로드 가능)"
+      responses:
+        "200":
+          description: 정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserUpdateResponse"
+        "400":
+          description: 현재 비밀번호가 일치하지 않습니다
+        "401":
+          description: 권한 없음
+        "404":
+          description: 존재하지 않는 사용자입니다
+        "500":
+          description: 서버 내부 오류
+
+  /api/apartments:
+    get:
+      tags:
+        - Apartments
+      summary: "슈퍼관리자/관리자/입주민(회원가입 시 사용)] 아파트 목록 조회(미가입자는 제한된 정보만 반환)"
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "아파트 이름"
+        - name: address
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "아파트 주소"
+      responses:
+        "200":
+          description: 아파트 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apartments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApartmentResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)
+        "500":
+          description: 서버 내부 오류
+
+  /api/apartments/{id}:
+    get:
+      tags:
+        - Apartments
+      summary: "[모든 사용자] 아파트 상세 조회"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "조회할 아파트 ID"
+      responses:
+        "200":
+          description: 아파트 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApartmentResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)
+        "404":
+          description: 아파트를 찾을 수 없음
+        "500":
+          description: 서버 내부 오류
+
+  /api/residents:
+    get:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 목록 조회"
+      parameters:
+        - name: building
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "동"
+        - name: unitNumber
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "호수"
+        - name: residenceStatus
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [RESIDENCE, NO_RESIDENCE]
+          description: "거주 여부"
+        - name: isRegistered
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: "위리브 가입 여부"
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "이름 검색"
+        - name: contact
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "연락처 검색"
+      responses:
+        "200":
+          description: 입주민 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResidentsListResponse"
+        "400":
+          description: 관리자 계정에 연결된 아파트 정보가 없습니다
+
+    post:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 리소스 생성(개별 등록)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                building:
+                  type: string
+                  example: "101"
+                unitNumber:
+                  type: string
+                  example: "101"
+                contact:
+                  type: string
+                  example: "01074716120"
+                name:
+                  type: string
+                  example: "홍길동"
+                isHouseholder:
+                  type: string
+                  enum: [HOUSEHOLDER, MEMBER]
+                  example: "HOUSEHOLDER"
+              required:
+                - building
+                - unitNumber
+                - contact
+                - name
+                - isHouseholder
+      responses:
+        "201":
+          description: 입주민 리소스 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResidentResponse"
+        "400":
+          description: 입주민 등록 요청 데이터가 유효하지 않습니다
+
+  /api/residents/from-users/{userId}:
+    post:
+      tags:
+        - Residents
+      summary: "[관리자] 사용자로부터 입주민 리소스 생성"
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "사용자 ID"
+      responses:
+        "201":
+          description: 사용자로부터 입주민 리소스 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResidentResponse"
+        "400":
+          description: userId가 전달되지 않았습니다
+        "404":
+          description: 해당 사용자 정보를 찾을 수 없습니다
+  
+  /api/residents/file/template:
+    get:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 업로드 템플릿 다운로드"
+      description: "관리자 계정에 연결된 아파트의 입주민 CSV 템플릿을 다운로드합니다."
+      responses:
+        "200":
+          description: 입주민 업로드 템플릿 다운로드 성공
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: 파일 다운로드를 위한 헤더
+              schema:
+                type: string
+                example: 'attachment; filename="residents_20231030_123456.csv"'
+            Content-Type:
+              description: CSV 파일 컨텐츠 타입
+              schema:
+                type: string
+                example: 'text/csv; charset=utf-8'
+        "400":
+          description: 관리자 계정에 연결된 아파트 정보가 없음
+        "500":
+          description: 템플릿 파일이 존재하지 않음 또는 서버 오류
+
+  /api/residents/from-file:
+    post:
+      tags:
+        - Residents
+      summary: "[관리자] 파일로부터 입주민 리소스 생성"
+      description: "CSV 파일을 업로드하여 입주민 데이터를 등록합니다."
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: "업로드할 CSV 파일"
+              required:
+                - file
+      responses:
+        "201":
+          description: 파일로부터 입주민 리소스 생성 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "5명의 입주민이 등록되었습니다"
+                  count:
+                    type: integer
+                    example: 5
+        "400":
+          description: CSV 파일 업로드 실패 
+        "409":
+          description: CSV 파일에 유효하지 않은 데이터 포함 또는 중복된 입주민
+        "500":
+          description: 서버 내부 오류
+  /api/residents/file:
+    get:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 목록 파일 다운로드"
+      description: "관리자가 아파트 입주민 목록을 CSV 파일로 다운로드합니다."
+      parameters:
+        - name: building
+          in: query
+          description: "동"
+          schema:
+            type: string
+        - name: unitNumber
+          in: query
+          description: "호수"
+          schema:
+            type: string
+        - name: residenceStatus
+          in: query
+          description: "거주 여부"
+          schema:
+            type: string
+            enum: [RESIDENCE, NO_RESIDENCE]
+        - name: isRegistered
+          in: query
+          description: "위리브 가입 여부"
+          schema:
+            type: boolean
+        - name: name
+          in: query
+          description: "이름 검색"
+          schema:
+            type: string
+        - name: contact
+          in: query
+          description: "연락처 검색"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 입주민 목록 파일 다운로드 성공
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: 파일 다운로드를 위한 헤더
+              schema:
+                type: string
+                example: 'attachment; filename="residents_20231030_123456.csv"'
+            Content-Type:
+              description: CSV 파일 컨텐츠 타입
+              schema:
+                type: string
+                example: 'text/csv; charset=utf-8'
+        "400":
+          description: 입주민 목록 파일 다운로드 실패
+        "401":
+          description: 권한 없음
+        "500":
+          description: 서버 오류
+
+  /api/residents/{id}:
+    get:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 상세 조회"
+      description: "특정 입주민의 상세 정보를 조회합니다."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 입주민 ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 입주민 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResidentResponse'
+        "400":
+          description: 입주민 상세 조회 실패
+        "401":
+          description: 권한이 없습니다
+        "404":
+          description: 입주민 정보 없음
+        "500":
+          description: 서버 오류
+    patch:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 정보 수정"
+      description: "특정 입주민의 정보를 수정합니다."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 입주민 ID
+          schema:
+            type: string
+      requestBody:
+        description: 수정할 입주민 정보
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                building:
+                  type: string
+                  description: "동"
+                  example: "101"
+                unitNumber:
+                  type: string
+                  description: "호수"
+                  example: "101"
+                contact:
+                  type: string
+                  description: "연락처"
+                  example: "01074716120"
+                name:
+                  type: string
+                  description: "이름"
+                  example: "홍길동"
+                isHouseholder:
+                  type: string
+                  description: "세대주 여부"
+                  enum: [HOUSEHOLDER, MEMBER]
+            example:
+              building: "101"
+              unitNumber: "101"
+              contact: "01074716120"
+              name: "홍길동"
+              isHouseholder: "HOUSEHOLDER"
+      responses:
+        "200":
+          description: 입주민 정보 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResidentResponse'
+        "400":
+          description: 입주민 정보 수정 실패
+        "404":
+          description: 입주민 정보 없음
+        "500":
+          description: 서버 오류
+
+    delete:
+      tags:
+        - Residents
+      summary: "[관리자] 입주민 정보 삭제"
+      description: "특정 입주민 정보를 삭제합니다. 연결된 유저 계정도 함께 삭제됩니다."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 입주민 ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 입주민 정보 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "작업이 성공적으로 완료되었습니다"
+        "400":
+          description: 입주민 정보 삭제 실패
+        "404":
+          description: 입주민 정보 없음
+        "500":
+          description: 서버 오류
+
+  /api/complaints:
+    post:
+      tags:
+        - Complaints
+      summary: "민원 등록"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "202호 내쫓아주세요"
+                content:
+                  type: string
+                  example: "202호 안 내쫓으면 제가 직접 손보겠습니다."
+                isPublic:
+                  type: boolean
+                  example: true
+                boardId:
+                  type: string
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                status:
+                  type: string
+                  enum: [PENDING, IN_PROGRESS, RESOLVED]
+                  example: "PENDING"
+      responses:
+        "201":
+          description: 민원 등록 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "정상적으로 등록 처리되었습니다"
+    get:
+      tags:
+        - Complaints
+      summary: "전체 민원 조회"
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          description: 페이지 번호
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: 한 페이지당 항목 수
+      responses:
+        "200":
+          description: 민원 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  complaints:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ComplaintDetail'
+                  totalCount:
+                    type: integer
+                    example: 10
+
+  /api/complaints/{complaintId}:
+    get:
+      tags:
+        - Complaints
+      summary: "민원 상세 조회"
+      parameters:
+        - name: complaintId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 민원 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintDetail'
+        "404":
+          description: 민원 없음
+
+    patch:
+      tags:
+        - Complaints
+      summary: "일반 유저 민원 수정"
+      parameters:
+        - name: complaintId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateComplaintInput'
+      responses:
+        "200":
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "정상적으로 수정 처리되었습니다"
+    delete:
+      tags:
+        - Complaints
+      summary: "민원 삭제"
+      parameters:
+        - name: complaintId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "정상적으로 삭제 처리되었습니다"
+
+  /api/complaints/{complaintId}/status:
+    patch:
+      tags:
+        - Complaints
+      summary: "관리자 민원 상태 변경"
+      parameters:
+        - name: complaintId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateComplaintStatusInput'
+      responses:
+        "200":
+          description: 상태 변경 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "정상적으로 변경되었습니다"
+                  data:
+                    $ref: '#/components/schemas/ComplaintDetail'
+
+  /api/polls:
+    post:
+      summary: 투표 글 작성
+      tags:
+        - Polls
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePollDto'
+            example:
+              boardId: "uuid-게시판ID"
+              status: "IN_PROGRESS"
+              title: "제 3기 동대표 선출"
+              content: "동대표를 선출합니다. 투표에 참여해주세요"
+              buildingPermission: 0
+              startDate: "2025-06-01T00:00:00Z"
+              endDate: "2025-06-10T00:00:00Z"
+              options:
+                - title: "101호"
+                - title: "404호"
+                - title: "504호"
+      responses:
+        '201':
+          description: 투표 생성 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  pollId:
+                    type: string
+                    format: uuid
+              example:
+                message: "투표가 성공적으로 생성되었습니다"
+                pollId: "uuid-pollId"
+
+    get:
+      summary: 투표 글 전체 조회
+      tags:
+        - Polls
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 11
+          description: 한 페이지당 항목 수
+      responses:
+        '200':
+          description: 투표 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollsListWrapperDto'
+              example:
+                polls:
+                  - pollId: "pollId-uuid"
+                    userId: "userId-uuid"
+                    title: "제 104기 동대표 선출"
+                    writerName: "강관리자"
+                    buildingPermission: 0
+                    createdAt: "2024-01-20T20:00:00Z"
+                    updatedAt: "2025-06-08T08:30:00Z"
+                    startDate: "2025-06-01T00:00:00Z"
+                    endDate: "2025-06-10T00:00:00Z"
+                    status: "PENDING"
+                totalCount: 42
+  
+  /api/polls/{pollId}:
+    get:
+      summary: 투표 글 상세 조회
+      tags:
+        - Polls
+      parameters:
+        - in: path
+          name: pollId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 조회할 투표 ID
+      responses:
+        '200':
+          description: 투표 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollDetailResponseDto'
+              example:
+                pollId: "pollId-uuid"
+                userId: "userId-uuid"
+                title: "제 104기 동대표 선출"
+                writerName: "강관리자"
+                buildingPermission: 0
+                createdAt: "2024-01-20T20:00:00Z"
+                updatedAt: "2025-06-08T08:30:00Z"
+                startDate: "2025-06-01T00:00:00Z"
+                endDate: "2025-06-10T00:00:00Z"
+                status: "IN_PROGRESS"
+                content: "투표 내용"
+                boardName: "주민투표 게시판"
+                options:
+                  - id: "optionId-1"
+                    title: "101호"
+                    voteCount: 10
+                  - id: "optionId-2"
+                    title: "404호"
+                    voteCount: 5
+    patch:
+      summary: 투표 글 수정
+      tags:
+        - Polls
+      parameters:
+        - in: path
+          name: pollId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 수정할 투표 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePollDto'
+            example:
+              title: "제 104기 동대표 선출 (수정)"
+              content: "투표 내용 수정"
+              buildingPermission: 0
+              startDate: "2025-06-02T00:00:00Z"
+              endDate: "2025-06-12T00:00:00Z"
+              status: "IN_PROGRESS"
+              options:
+                - title: "101호"
+                - title: "404호"
+      responses:
+        '200':
+          description: 투표 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "투표가 성공적으로 수정되었습니다"
+        '403':
+          description: 권한 없음
+        '400':
+          description: 잘못된 요청
+        '404':
+          description: 투표 또는 사용자 정보 없음
+
+    delete:
+      summary: 투표 글 삭제
+      tags:
+        - Polls
+      parameters:
+        - in: path
+          name: pollId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 삭제할 투표 ID
+      responses:
+        '200':
+          description: 투표 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "투표가 성공적으로 삭제되었습니다"
+        '403':
+          description: 권한 없음
+        '400':
+          description: 잘못된 요청 (이미 시작된 투표 등)
+        '404':
+          description: 투표 또는 사용자 정보 없음
+  
+  /api/notices:
+    post:
+      summary: 공지사항 등록
+      tags:
+        - Notices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoticeRequestDto'
+            example:
+              category: "MAINTENANCE"
+              title: "승강기 일시 운행 중단 안내"
+              content: "승강기 정기점검"
+              boardId: "게시판-ID"
+              isPinned: false
+              startDate: "2025-06-01T00:00:00Z"
+              endDate: "2025-06-10T00:00:00Z"
+      responses:
+          '201':
+            description: 공지사항 등록 성공
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                example:
+                  message: "정상적으로 등록 처리되었습니다."
+
+    get:
+      summary: 공지사항 전체 조회
+      tags:
+        - Notices
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: 한 페이지당 항목 수
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [ MAINTENANCE, EMERGENCY, COMMUNITY, RESIDENT_VOTE,RESIDENT_COUNCIL, ETC ]
+          description: 공지사항 카테고리 필터
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: 제목 또는 내용 검색어
+      responses:
+        '200':
+          description: 공지사항 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeListResponseDto'
+              example:
+                notices:
+                  - noticeId: "uuid-공지사항ID"
+                    userId: "uuid-작성자ID"
+                    category: "MAINTENANCE"
+                    title: "승강기 정기점검 안내"
+                    writerName: "홍관리"
+                    isPinned: false
+                    boardId: "uuid-boardId"
+                    viewsCount: 52
+                    commentsCount: 3
+                    startDate: "2025-06-01T00:00:00Z"
+                    endDate: "2025-06-10T00:00:00Z"
+                    createdAt: "2025-05-20T08:00:00Z"
+                    updatedAt: "2025-05-22T10:30:00Z"
+                totalCount: 42
+
+  /api/notices/{noticeId}:
+    get:
+      summary: 공지사항 상세 조회
+      tags:
+        - Notices
+      parameters:
+        - in: path
+          name: noticeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 상세 조회할 공지사항 ID
+      responses:
+        '200':
+          description: 공지사항 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeDetailResponseDto'
+              example:
+                noticeId: "uuid-공지ID"
+                userId: "uuid-작성자ID"
+                category: "GENERAL"
+                title: "관리비 납부 안내"
+                writerName: "관리소장"
+                isPinned: true
+                boardId: "uuid-boardId"
+                viewsCount: 120
+                commentsCount: 2
+                startDate: "2025-06-01T00:00:00Z"
+                endDate: "2025-06-10T00:00:00Z"
+                createdAt: "2025-05-25T09:00:00Z"
+                updatedAt: "2025-05-26T11:30:00Z"
+                content: "관리비 납부 기간은 6월 1일부터 10일까지입니다."
+                boardName: "NOTICE"
+                comments:
+                  - id: "commentId-1"
+                    userId: "uuid-user1"
+                    writerName: "입주민A"
+                    content: "확인했습니다!"
+                    createdAt: "2025-05-26T09:00:00Z"
+                    updatedAt: "2025-05-26T09:00:00Z"
+                  - id: "commentId-2"
+                    userId: "uuid-user2"
+                    writerName: "입주민B"
+                    content: "좋은 공지 감사합니다."
+                    createdAt: "2025-05-26T10:00:00Z"
+                    updatedAt: "2025-05-26T10:00:00Z"
+        '404':
+          description: 공지사항을 찾을 수 없음
+
+    patch:
+      summary: 공지사항 수정
+      tags:
+        - Notices
+      parameters:
+        - in: path
+          name: noticeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 수정할 공지사항 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoticeRequestDto'
+            example:
+              category: "GENERAL"
+              title: "관리비 납부 안내 (수정)"
+              content: "납부 기한이 연장되었습니다."
+              boardId: "uuid-boardId"
+              isPinned: true
+              startDate: "2025-06-02T00:00:00Z"
+              endDate: "2025-06-12T00:00:00Z"
+      responses:
+        '200':
+          description: 공지사항 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "정상적으로 수정 되었습니다."
+        '404':
+          description: 수정 대상 공지사항을 찾을 수 없음
+
+    delete:
+      summary: 공지사항 삭제
+      tags:
+        - Notices
+      parameters:
+        - in: path
+          name: noticeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 삭제할 공지사항 ID
+      responses:
+        '200':
+          description: 공지사항 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "공지사항이 정상적으로 삭제 되었습니다."
+        '404':
+          description: 삭제할 공지사항을 찾을 수 없음
+  
+  /api/notifications/sse:
+    get:
+      summary: 읽지 않은 알림 실시간 수신 (SSE)
+      description: |
+        SSE(Server-Sent Events)를 통해 사용자의 읽지 않은 알림을 전송합니다. 
+      tags:
+        - Notifications
+      responses:
+        '200':
+          description: 실시간 알림 스트림 전송 (SSE)
+          content:
+            text/event-stream:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: alarm
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NotificationResponseDto'
+              example:
+                event: alarm
+                data:
+                  type: "alarm"
+                  data:
+                    - notificationId: "uuid-1234"
+                      content: "새로운 공지사항이 등록되었습니다."
+                      notificationType: "NOGENERALTICE"
+                      notifiedAt: "2025-06-01T12:00:00Z"
+                      isChecked: false
+                      complaintId: null
+                      noticeId: "uuid-공지ID"
+                      pollId: null
+        '500':
+          description: 알림 스트림 초기화 실패
+
+  /api/notifications/{notificationId}/read:
+    patch:
+      summary: 알림 읽음 처리
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 읽음 처리할 알림의 ID
+      responses:
+        '200':
+          description: 알림 읽음 처리 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Notification marked as read"
+        '404':
+          description: 해당 알림을 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Notification not found"
+
+  /api/app:
+    get:
+      summary: 헬스 체크
+      description: 서버의 상태를 점검하기 위한 엔드포인트입니다.  
+      tags:
+        - Health
+      responses:
+        '200':
+          description: 서버 정상 동작
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              example:
+                status: "ok"
+        '500':
+          description: 서버 상태 이상
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/votes/{optionId}/vote:
+    post:
+      summary: 투표하기
+      description: 사용자가 특정 옵션에 투표합니다.  
+        이미 투표했거나 권한이 없는 경우 오류가 발생합니다.
+      tags:
+        - Pollsvotes
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          description: 투표할 옵션 ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 투표 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+              example:
+                message: "투표가 성공적으로 등록되었습니다."
+                updatedOption:
+                  id: "uuid-option-1"
+                  title: "선택지 A"
+                  votes: 10
+                winnerOption:
+                  id: "uuid-option-2"
+                  title: "선택지 B"
+                  votes: 12
+                options:
+                  - id: "uuid-option-1"
+                    title: "선택지 A"
+                    votes: 10
+                  - id: "uuid-option-2"
+                    title: "선택지 B"
+                    votes: 12
+        '400':
+          description: 잘못된 요청 (옵션 ID 누락, UUID 형식 오류 등)  
+        '403':
+          description: 권한 없음
+        '404':
+          description: 옵션이나 투표를 찾을 수 없음
+        '409':
+          description: 이미 투표한 경우
+
+    delete:
+      summary: 투표 취소
+      description: 사용자가 특정 옵션에 대한 투표를 취소합니다.  
+        투표 종료 후에는 취소할 수 없습니다.
+      tags:
+        - Pollsvotes
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          description: 취소할 옵션 ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 투표 취소 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteDeleteResponse'
+              example:
+                message: "투표가 성공적으로 취소되었습니다."
+                updatedOption:
+                  id: "uuid-option-1"
+                  title: "선택지 A"
+                  votes: 9
+        '400':
+          description: 잘못된 요청 (투표 종료 후 취소 등)
+        '403':
+          description: 권한 없음
+        '404':
+          description: 투표 기록이나 옵션을 찾을 수 없음
+
+  /api/poll-scheduler/ping:
+    get:
+      summary: Poll 스케줄러 상태 확인 (개발용)
+      tags:
+        - Poll Scheduler
+      responses:
+        '200':
+          description: 스케줄러 실행 상태
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Poll scheduler is running."
+
+  /api/poll-scheduler/run:
+    post:
+      summary: 수동으로 스케줄러 실행 (개발/테스트용)
+      tags:
+        - Poll Scheduler
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 스케줄러 실행 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Poll scheduler executed successfully."
+        '500':
+          description: 스케줄러 실행 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Failed to execute poll scheduler."
+  /api/comments:
+    post:
+      tags:
+        - Comments
+      summary: 댓글 등록
+      description: 사용자 권한 필요 (USER)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+                - boardId
+                - boardType
+              properties:
+                content:
+                  type: string
+                  description: 댓글 내용
+                boardId:
+                  type: string
+                  description: 댓글을 작성할 게시판 ID
+                boardType:
+                  type: string
+                  description: 게시판 유형
+                  enum: [COMPLAINT, RESIDENT_NOTICE, OTHER]
+      responses:
+        '201':
+          description: 댓글 생성 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      content:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      writerName:
+                        type: string
+                  board:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      boardType:
+                        type: string
+
+    get:
+      tags:
+        - Comments
+      summary: 댓글 조회
+      description: 사용자 권한 필요 (USER)
+      parameters:
+        - in: query
+          name: boardId
+          schema:
+            type: string
+          required: true
+          description: 댓글을 조회할 게시판 ID
+        - in: query
+          name: boardType
+          schema:
+            type: string
+            enum: [COMPLAINT, NOTICE]
+          required: true
+          description: 게시판 유형
+      responses:
+        '200':
+          description: 댓글 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        userId:
+                          type: string
+                        content:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        writerName:
+                          type: string
+                  board:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      boardType:
+                        type: string
+                  total:
+                    type: integer
+
+  /api/comments/{commentId}:
+    patch:
+      tags:
+        - Comments
+      summary: 댓글 수정
+      description: 사용자 권한 필요 (본인 댓글만)
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+          description: 수정할 댓글 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: 수정할 댓글 내용
+      responses:
+        '200':
+          description: 댓글 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      content:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      writerName:
+                        type: string
+                  board:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      boardType:
+                        type: string
+
+    delete:
+      tags:
+        - Comments
+      summary: 댓글 삭제
+      description: 사용자 권한 필요 (본인 댓글)
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+          description: 삭제할 댓글 ID
+      responses:
+        '200':
+          description: 댓글 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 정상적으로 삭제 처리되었습니다
