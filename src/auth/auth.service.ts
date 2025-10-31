@@ -50,20 +50,22 @@ export const signup = async (body: z.infer<typeof SignupRequestBodySchema>) => {
   });
 
   if (existResidents.length > 0) {
-    const isMatch = existResidents.some((resident) => {
-      return resident.residents.some((r: Resident) => r.name === name && r.contact === contact);
-    });
-
-    if (isMatch) {
-      resident = existResidents[0].residents.find((r: Resident) => r.name === name && r.contact === contact);
-      joinStatus = ApprovalStatus.APPROVED;
-      isRegistered = resident.isRegistered;
-      if (!isRegistered) {
-        resident.isRegistered = true;
-        await residentRepository.save(resident);
+    for (const apartment of existResidents) {
+      const found = apartment.residents.find((r: Resident) => r.name === name && r.contact === contact);
+      if (found) {
+        resident = found;
+        joinStatus = ApprovalStatus.APPROVED;
+        isRegistered = resident.isRegistered;
+        if (!isRegistered) {
+          resident.isRegistered = true;
+          await residentRepository.save(resident);
+        }
+        break;
       }
     }
-  } else {
+  }
+
+  if (!resident) {
     resident = residentRepository.create({
       building: apartmentDong,
       unitNumber: apartmentHo,
@@ -80,7 +82,6 @@ export const signup = async (body: z.infer<typeof SignupRequestBodySchema>) => {
   }
 
   const residentId = resident.id;
-
   const hashedPassword = await hashPassword(password);
 
   const newUser = userRepository.create({
@@ -98,7 +99,6 @@ export const signup = async (body: z.infer<typeof SignupRequestBodySchema>) => {
   });
 
   await userRepository.save(newUser);
-
   resident.user = newUser;
   await residentRepository.save(resident);
 
