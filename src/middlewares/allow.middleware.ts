@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, UnauthorizedError } from '../types/error.type';
-import { isUserAdmin, isUserSuperAdmin, setUser } from '../utils/user.util';
+import { isUser, isUserAdmin, isUserSuperAdmin, setUser } from '../utils/user.util';
 import { getAccessToken, verifyAccessToken } from '../utils/token.util';
 
 export enum AllowedRole {
@@ -27,7 +27,7 @@ export const allow = (role: AllowedRole) => {
     setUser(req, payload);
 
     // USER
-    if (role === 'USER' || isUserAdmin(payload) || isUserSuperAdmin(payload)) {
+    if (role === 'USER' || isUser(payload) || isUserAdmin(payload) || isUserSuperAdmin(payload)) {
       return next();
     }
 
