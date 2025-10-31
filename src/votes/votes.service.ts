@@ -70,16 +70,29 @@ export const voteForOption = async (
 
   // 투표 권한 확인 (buildingPermission)
   // 관리자(ADMIN)는 모든 투표 참여 가능
+
   if (user.role !== "ADMIN") {
     if (
       poll.buildingPermission !== undefined &&
       poll.buildingPermission !== null &&
       poll.buildingPermission !== 0 // 0이면 전체 공개
     ) {
-      const userDong = user.resident ? parseInt(user.resident.dong) : null;
-      const pollDong = poll.buildingPermission % 100; // 101 → 1, 102 → 2
+      // dong 또는 building 필드 사용
+      const userDongNumber = user.resident
+        ? parseInt(user.resident.dong || user.resident.building)
+        : null;
 
-      if (!userDong || userDong !== pollDong) {
+      if (userDongNumber) {
+        // 직접 비교 또는 % 100 비교
+        const isAuthorized =
+          poll.buildingPermission === userDongNumber ||
+          poll.buildingPermission % 100 === userDongNumber % 100;
+
+        if (!isAuthorized) {
+          throw new ForbiddenError("이 투표에 참여할 권한이 없습니다.");
+        }
+      } else {
+        // 거주지 정보가 없으면 참여 불가
         throw new ForbiddenError("이 투표에 참여할 권한이 없습니다.");
       }
     }

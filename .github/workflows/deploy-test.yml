@@ -1,4 +1,4 @@
-name: Deploy TypeScript Express API (EC2 Build)
+name: Deploy TypeScript Express API (EC2 Direct Build)
 
 on:
   push:
@@ -13,36 +13,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy Source Code to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST_TEST }}
-          username: ${{ secrets.EC2_USER_TEST }}
-          key: ${{ secrets.EC2_KEY_TEST }}
-          timeout: 20m
-          source: "."
-          target: /home/ubuntu/welive-src
-
-      - name: Build and Deploy on EC2
+      - name: Deploy and Build on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
           username: ${{ secrets.EC2_USER_TEST }}
           key: ${{ secrets.EC2_KEY_TEST }}
+          timeout: 20m
           script: |
-            # 환경 세팅
-            cd /home/ubuntu/welive-src
+            cd /home/ubuntu
+
+            if [ ! -d "welive" ]; then
+              git clone https://github.com/JONGJIN-LEE1/nb02-welive-team3.git welive
+            fi
+
+            cd welive
+            git fetch --all
+            git reset --hard origin/develop
+
             rm -rf dist
-            npm ci
-            npm run build
+            npm install
+            npm run prestart
 
-            # 배포 디렉토리 교체
-            rm -rf /home/ubuntu/welive
-            mkdir -p /home/ubuntu/welive
-            cp -r dist package.json package-lock.json deploy /home/ubuntu/welive
-
-            # .env 파일 생성
-            cat << 'EOF' > /home/ubuntu/welive/.env
+            cat << 'EOF' > .env
             PORT=${{ secrets.PORT_TEST }}
             NODE_ENV=${{ secrets.NODE_ENV_TEST }}
             DB_HOST=${{ secrets.DB_HOST_TEST }}
@@ -61,27 +54,26 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET_TEST }}
             EOF
 
-            # nginx 설정
+            npm run migration:run
+
             if [ -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
-              sudo cp /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
             else
-              sudo cp /home/ubuntu/welive/deploy/nginx-http.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-http.conf /etc/nginx/sites-available/welive
             fi
+
             sudo ln -sf /etc/nginx/sites-available/welive /etc/nginx/sites-enabled/welive
             sudo rm -f /etc/nginx/sites-enabled/default
             sudo nginx -t && sudo systemctl reload nginx
 
-            # SSL 인증서 없으면 발급
             if [ ! -d "/etc/letsencrypt/live/api.welive-test.online" ]; then
               sudo apt update -y
               sudo apt install -y certbot python3-certbot-nginx
               sudo certbot certonly --nginx -d api.welive-test.online --non-interactive --agree-tos -m admin@welive-test.online
-              sudo cp /home/ubuntu/welive/deploy/nginx-https.conf /etc/nginx/sites-available/welive
+              sudo cp deploy/nginx-https.conf /etc/nginx/sites-available/welive
               sudo nginx -t && sudo systemctl reload nginx
             fi
 
-            # PM2 실행
-            cd /home/ubuntu/welive
-            npm ci --omit=dev
-            pm2 restart welive-test || pm2 start dist/app.js --name welive-test
+            pm2 delete welive-test || true
+            pm2 start npm --name "welive-test" -- run start
             pm2 save
