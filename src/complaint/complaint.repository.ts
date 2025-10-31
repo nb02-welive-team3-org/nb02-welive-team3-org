@@ -22,16 +22,26 @@ export async function getComplaints(page: number, limit: number) {
     skip,
     take: limit,
     order: { createdAt: "DESC" },
-    relations: ["user"],
+    relations: ["user", "complaintBoard", "comments"],
   });
+
+  complaints.forEach((c) => {
+    if (!c.comments) c.comments = [];
+  });
+
   return { complaints, totalCount };
 }
 
 export async function getComplaintById(complaintId: string) {
-  return await complaintRepository.findOne({
+  const complaint = await complaintRepository.findOne({
     where: { complaintId },
-    relations: ["user", "complaintBoard", "comments"],
+    relations: ["user", "complaintBoard", "comments", "comments.user"],
   });
+
+  if (!complaint) return null;
+  if (!complaint.comments) complaint.comments = [];
+
+  return complaint;
 }
 
 export async function updateComplaint(complaintId: string, data: UpdateComplaintInput) {
@@ -44,5 +54,6 @@ export async function deleteComplaint(complaintId: string) {
 
 export async function updateComplaintStatus(complaintId: string, data: UpdateComplaintStatusInput) {
   await complaintRepository.update({ complaintId }, { status: data.status as ComplaintStatus });
-  return getComplaintById(complaintId);
+  const complaint = await getComplaintById(complaintId);
+  return complaint;
 }
