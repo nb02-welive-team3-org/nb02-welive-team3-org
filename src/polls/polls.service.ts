@@ -177,21 +177,37 @@ export const getPolls = async (
 
     // 일반 사용자(USER)인 경우 권한 필터링 추가
     if (userRole === "USER") {
-      // 사용자의 거주지 동 번호 가져오기
       const userDongNumber = user.resident
-        ? parseInt(user.resident.dong)
+        ? parseInt(user.resident.dong || user.resident.building)
         : null;
+      // 디버깅 로그 추가
+      console.log("=== 투표 필터링 디버깅 ===");
+      console.log("user.id:", user.id);
+      console.log("user.name:", user.name);
+      console.log("user.resident:", user.resident);
+      console.log("user.resident.dong:", user.resident?.dong);
+      console.log("userDongNumber:", userDongNumber);
+      console.log(
+        "userDongNumber % 100:",
+        userDongNumber ? userDongNumber % 100 : null
+      );
 
       if (userDongNumber) {
-        // buildingPermission이 0(전체 공개) 또는
-        // buildingPermission이 null(전체) 또는 사용자의 동 번호와 일치하는 투표만
+        // 두 가지 저장 방식 모두 지원
+        // 1. dong이 "1"이고 buildingPermission이 101인 경우 (% 100 = 1)
+        // 2. dong이 "201"이고 buildingPermission이 201인 경우 (직접 비교)
         queryBuilder.andWhere(
-          "(poll.buildingPermission = 0 OR (poll.buildingPermission % 100) = :dongNumber)",
-          { dongNumber: userDongNumber }
+          "(poll.buildingPermission = 0 OR poll.buildingPermission IS NULL OR poll.buildingPermission = :dongNumber OR (poll.buildingPermission % 100) = :dongNumberMod)",
+          {
+            dongNumber: userDongNumber, // 201인 경우
+            dongNumberMod: userDongNumber % 100, // 1인 경우
+          }
         );
       } else {
         // 거주지 정보가 없으면 전체 공개 투표만
-        queryBuilder.andWhere("poll.buildingPermission = 0");
+        queryBuilder.andWhere(
+          "(poll.buildingPermission = 0 OR poll.buildingPermission IS NULL)"
+        );
       }
     }
     // ADMIN이나 SUPER_ADMIN은 모든 투표 조회 가능
