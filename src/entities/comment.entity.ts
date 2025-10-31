@@ -14,7 +14,7 @@ import { Notice } from './notice.entity';
 @Entity({ name: 'comments' })
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
-  commentId!: string;
+  id!: string;
 
   @Column({ type: 'text' })
   content!: string;
