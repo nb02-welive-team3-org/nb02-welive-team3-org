@@ -14,7 +14,9 @@ export const allow = (role: AllowedRole) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     const accessToken = getAccessToken(req);
 
-    // NONE : signup,login
+    // 2025.10.31
+    // 토큰이 없는 경우 예외처리
+    // 역할이 NONE인 경우만 통과합니다.
     if (accessToken === undefined) {
       if (role === 'NONE') {
         return next();
@@ -26,20 +28,16 @@ export const allow = (role: AllowedRole) => {
 
     setUser(req, payload);
 
-    // USER
-    if (role === 'USER' || isUser(payload) || isUserAdmin(payload) || isUserSuperAdmin(payload)) {
-      return next();
-    }
+    // 2025.10.31
+    // 역할에 따른 접근 제어 로직 개선
+    // 순서 변경 및 역할 체크 방식 수정
+    if (isUserSuperAdmin(payload)) return next();
 
-    // ADMIN
-    if ((role === 'ADMIN' && isUserAdmin(payload)) || isUserSuperAdmin(payload)) {
-      return next();
-    }
+    if (role === 'ADMIN' && isUserAdmin(payload)) return next();
 
-    // SUPER_ADMIN
-    if (role === 'SUPER_ADMIN' && isUserSuperAdmin(payload)) {
-      return next();
-    }
+    if (role === 'USER' && (isUser(payload) || isUserAdmin(payload))) return next();
+
+    if (role === 'NONE' && (isUser(payload) || isUserAdmin(payload) || isUserSuperAdmin(payload))) return next();
 
     throw new ForbiddenError();
   };
