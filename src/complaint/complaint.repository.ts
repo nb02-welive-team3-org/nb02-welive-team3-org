@@ -4,8 +4,12 @@ import { CreateComplaintInput, UpdateComplaintInput, UpdateComplaintStatusInput 
 
 const complaintRepository = AppDataSource.getRepository(Complaint);
 
-export async function createComplaint(data: CreateComplaintInput) {
-  return await complaintRepository.save(data);
+export async function createComplaint(data: CreateComplaintInput & { userId: string }) {
+  const complaintData = {
+    ...data,
+    status: data.status ? (data.status as ComplaintStatus) : ComplaintStatus.PENDING,
+  };
+  return await complaintRepository.save(complaintData);
 }
 
 export async function getComplaints(page: number, limit: number) {
@@ -21,7 +25,6 @@ export async function getComplaints(page: number, limit: number) {
   return { complaints, totalCount };
 }
 
-
 export async function getComplaintById(complaintId: string) {
   return await complaintRepository.findOne({
     where: { complaintId },
@@ -29,11 +32,9 @@ export async function getComplaintById(complaintId: string) {
   });
 }
 
-
 export async function updateComplaint(complaintId: string, data: UpdateComplaintInput) {
   await complaintRepository.update({ complaintId }, data);
 }
-
 
 export async function deleteComplaint(complaintId: string) {
   return await complaintRepository.delete({ complaintId });

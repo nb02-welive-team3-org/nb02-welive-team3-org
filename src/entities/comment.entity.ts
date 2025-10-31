@@ -6,19 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  Index,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Complaint } from './complaint.entity';
 import { Notice } from './notice.entity';
 
-export enum BoardType {
-  COMPLAINT = 'COMPLAINT',
-  NOTICE = 'NOTICE',
-}
-
 @Entity({ name: 'comments' })
-@Index(['boardType', 'boardId'])
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
   commentId!: string;
@@ -33,24 +26,30 @@ export class Comment {
   @Column({ type: 'uuid' })
   userId!: string;
 
-  @Column()
+  @Column({ type: 'text' })
   writerName!: string;
 
-  @Column({ type: 'enum', enum: BoardType })
-  boardType!: BoardType;
-
-  @Column({ type: 'uuid' })
-  boardId!: string; // complaintId | noticeId | pollId
-
   // 민원
-  @ManyToOne(() => Complaint, (complaint) => complaint.comments, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Complaint, (complaint) => complaint.comments, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'complaint_id' })
   complaint?: Complaint;
 
+  @Column({ type: 'uuid', nullable: true })
+  complaintId?: string;
+
   // 공지사항
-  @ManyToOne(() => Notice, (notice) => notice.comments, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Notice, (notice) => notice.comments, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'notice_id' })
   notice?: Notice;
+
+  @Column({ type: 'uuid', nullable: true })
+  noticeId?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

@@ -13,7 +13,11 @@ import { ComplaintBoard } from './complaint-board.entity';
 import { Comment } from './comment.entity';
 import { Notification } from './notification.entity';
 
-export type ComplaintStatus = 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
+export enum ComplaintStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  RESOLVED = 'RESOLVED',
+}
 
 @Entity({ name: 'complaints' })
 export class Complaint {
@@ -24,7 +28,7 @@ export class Complaint {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;
 
   @ManyToOne(() => ComplaintBoard, (board) => board.complaints, {
@@ -32,10 +36,16 @@ export class Complaint {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'board_id' })
-  complaintBoard!: ComplaintBoard | null;
+  complaintBoard?: ComplaintBoard | null;
 
-  @Column({ type: 'uuid', nullable: true })
-  boardId!: string | null;
+  @Column({
+    name: 'board_id',
+    type: 'uuid',
+    nullable: true,
+    insert: false,
+    update: false,
+  })
+  boardId?: string | null;
 
   @Column({ length: 100 })
   title!: string;
@@ -48,16 +58,13 @@ export class Complaint {
 
   @Column({
     type: 'enum',
-    enum: ['PENDING', 'IN_PROGRESS', 'RESOLVED'],
-    default: 'PENDING',
+    enum: ComplaintStatus,
+    default: ComplaintStatus.PENDING,
   })
   status!: ComplaintStatus;
 
   @Column({ default: 0 })
   viewsCount!: number;
-
-  @Column({ default: 0 })
-  commentsCount!: number;
 
   @Column({ nullable: true })
   dong?: string;
@@ -65,10 +72,20 @@ export class Complaint {
   @Column({ nullable: true })
   ho?: string;
 
-  @OneToMany(() => Comment, (comment) => comment.complaint)
+  /**
+   * 댓글(Comment)
+   */
+  @OneToMany(() => Comment, (comment) => comment.complaint, {
+    cascade: true,
+  })
   comments!: Comment[];
 
-  @OneToMany(() => Notification, (notification) => notification.complaint)
+  /**
+   * 알림(Notification)
+   */
+  @OneToMany(() => Notification, (notification) => notification.complaint, {
+    cascade: true,
+  })
   notifications!: Notification[];
 
   @CreateDateColumn({ name: 'created_at' })

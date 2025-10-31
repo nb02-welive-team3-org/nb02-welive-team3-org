@@ -12,7 +12,7 @@ import {
 //import { User } from './user.entity';
 import { NoticeBoard } from './notice-board.entity';
 //import { Apartment } from './apartment.entity';
-import { Comment } from '../entities/comment.entity';
+import { Comment } from './comment.entity';
 
 // =
 // : 공지사항
