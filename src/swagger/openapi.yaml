@@ -2569,7 +2569,7 @@ paths:
               example:
                 message: "Notification not found"
 
-  /api/app:
+  /api:
     get:
       summary: 헬스 체크
       description: 서버의 상태를 점검하기 위한 엔드포인트입니다.  
