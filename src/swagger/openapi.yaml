@@ -1,0 +1,337 @@
+openapi: 3.0.0
+info:
+  title: Welive Backend API
+  version: 1.0.0
+  description: 위리브 백엔드 API 명세
+
+tags:
+  - name: Auth
+    description: 인증 관리
+
+components:
+  schemas:
+    # 일반 회원가입 요청
+    SignupRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: testuser
+        password:
+          type: string
+          example: password123!
+        contact:
+          type: string
+          example: "01012345678"
+        name:
+          type: string
+          example: 홍길동
+        email:
+          type: string
+          example: test@example.com
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          default: USER
+          example: USER
+        apartmentName:
+          type: string
+          example: "웰리브 아파트"
+        apartmentDong:
+          type: string
+          example: "101"
+        apartmentHo:
+          type: string
+          example: "201"
+      required:
+        - username
+        - password
+        - contact
+        - name
+        - email
+        - apartmentName
+        - apartmentDong
+        - apartmentHo
+
+    # 일반 회원가입 응답
+    SignupResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: 홍길동
+        email:
+          type: string
+          example: test@example.com
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          example: USER
+        joinStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+          example: PENDING
+        isActive:
+          type: boolean
+          example: true
+      required:
+        - id
+        - name
+        - email
+        - role
+        - joinStatus
+        - isActive
+
+    # 관리자 회원가입 요청
+    SignupAdminRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: adminuser01
+        password:
+          type: string
+          example: AdminPass123!
+        contact:
+          type: string
+          example: "01098765432"
+        name:
+          type: string
+          example: 홍길동
+        email:
+          type: string
+          example: admin@example.com
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          default: ADMIN
+          example: ADMIN
+        description:
+          type: string
+          example: "관리자 계정"
+        startComplexNumber:
+          type: string
+          example: "101"
+        endComplexNumber:
+          type: string
+          example: "105"
+        startDongNumber:
+          type: string
+          example: "1"
+        endDongNumber:
+          type: string
+          example: "5"
+        startFloorNumber:
+          type: string
+          example: "1"
+        endFloorNumber:
+          type: string
+          example: "10"
+        startHoNumber:
+          type: string
+          example: "101"
+        endHoNumber:
+          type: string
+          example: "105"
+        apartmentName:
+          type: string
+          example: "웰리브 아파트"
+        apartmentAddress:
+          type: string
+          example: "서울시 강남구 역삼동 123-45"
+        apartmentManagementNumber:
+          type: string
+          example: "001"
+      required:
+        - username
+        - password
+        - contact
+        - name
+        - email
+        - apartmentName
+        - apartmentAddress
+        - apartmentManagementNumber
+
+    # 관리자 회원가입 응답
+    SignupAdminResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "admin-1234"
+        name:
+          type: string
+          example: "홍길동"
+        email:
+          type: string
+          example: "admin@example.com"
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          example: ADMIN
+        joinStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+          example: APPROVED
+        isActive:
+          type: boolean
+          example: true
+      required:
+        - id
+        - name
+        - email
+        - role
+        - joinStatus
+        - isActive
+
+    # 슈퍼 관리자 회원가입 요청
+    SignupSuperAdminRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: superadmin1
+        password:
+          type: string
+          example: superPass123!
+        contact:
+          type: string
+          example: "01045627894"
+        name:
+          type: string
+          example: 홍길
+        email:
+          type: string
+          example: superadmin@example.com
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          default: SUPER_ADMIN
+          example: SUPER_ADMIN
+        description:
+          type: string
+          example: "슈퍼 관리자 계정"
+      required:
+        - username
+        - password
+        - contact
+        - name
+        - email
+        - role
+
+    # 슈퍼 관리자 회원가입 응답
+    SignupSuperAdminResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "superadmin-001"
+        name:
+          type: string
+          example: "홍길"
+        email:
+          type: string
+          example: "superadmin@example.com"
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          example: SUPER_ADMIN
+        joinStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+          example: APPROVED
+        isActive:
+          type: boolean
+          example: true
+      required:
+        - id
+        - name
+        - email
+        - role
+        - joinStatus
+        - isActive
+
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: "[일반 사용자] 회원가입"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.
+        "403":
+          description: 접근 권한이 없습니다(이미 로그인 상태이거나 비활성화된 계정입니다).
+        "409":
+          description: 이미 사용 중인 정보(아이디, 이메일, 전화번호)입니다.
+        "500":
+          description: 회원가입을 진행하는 중 오류가 발생했습니다.
+
+  /api/auth/signup/admin:
+    post:
+      tags:
+        - Auth
+      summary: "[관리자] 회원가입"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupAdminRequest"
+      responses:
+        "201":
+          description: 관리자 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupAdminResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.
+        "403":
+          description: 접근 권한이 없습니다(이미 로그인 상태이거나 비활성화된 계정입니다).
+        "409":
+          description: 이미 사용 중인 정보(아이디, 이메일, 전화번호)입니다.
+        "500":
+          description: 회원가입을 진행하는 중 오류가 발생했습니다.
+
+  /api/auth/signup/super-admin:
+    post:
+      tags:
+        - Auth
+      summary: "[슈퍼 관리자] 회원가입"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupSuperAdminRequest"
+      responses:
+        "201":
+          description: 슈퍼 관리자 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupSuperAdminResponse"
+        "400":
+          description: 잘못된 요청(필수사항 누락 또는 잘못된 입력값)입니다.
+        "403":
+          description: 접근 권한이 없습니다(이미 로그인 상태이거나 비활성화된 계정입니다).
+        "409":
+          description: 이미 사용 중인 정보(아이디, 이메일, 전화번호)입니다.
+        "500":
+          description: 회원가입을 진행하는 중 오류가 발생했습니다.

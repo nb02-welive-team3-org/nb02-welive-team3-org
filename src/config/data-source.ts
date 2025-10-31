@@ -1,16 +1,26 @@
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import env from './env';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const isProd = env.NODE_ENV === 'production';
+let extraOptions: any = {};
 
-const extraOptions: any = isProd
-  ? {
+if (isProd) {
+  const rdsCaPath = path.join(__dirname, '..', '..', 'certs', 'rds-ca.pem');
+
+  if (fs.existsSync(rdsCaPath)) {
+    extraOptions = {
       ssl: {
+        ca: fs.readFileSync(rdsCaPath).toString(),
         rejectUnauthorized: true,
       },
-    }
-  : {};
+    };
+  } else {
+    console.warn('RDS Root CA file not found! Connection might fail.');
+  }
+}
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
