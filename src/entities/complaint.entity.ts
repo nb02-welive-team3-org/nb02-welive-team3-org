@@ -25,25 +25,25 @@ export class Complaint {
   complaintId!: string;
 
   @ManyToOne(() => User, (user) => user.complaints, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @Column({ name: 'user_id', type: 'uuid' })
+  @Column({ name: 'userId', type: 'uuid' })
   userId!: string;
 
   @ManyToOne(() => ComplaintBoard, (board) => board.complaints, {
-  nullable: true,
-  onDelete: 'SET NULL',
+    nullable: false,
+    onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'board_id' })
-  complaintBoard?: ComplaintBoard | null;
+  @JoinColumn({ name: 'boardId' })
+  complaintBoard!: ComplaintBoard;
 
   @Column({
-    name: 'board_id',
+    name: 'boardId',
     type: 'uuid',
-    nullable: true,
+    nullable: false,
   })
-  boardId?: string | null;
+  boardId!: string;
 
   @Column({ length: 100 })
   title!: string;
