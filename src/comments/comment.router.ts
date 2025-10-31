@@ -1,4 +1,3 @@
-// comment.route.ts
 import express from 'express';
 import { allow, AllowedRole } from '../middlewares/allow.middleware';
 import {

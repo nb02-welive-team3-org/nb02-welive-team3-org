@@ -1,4 +1,3 @@
-// comment.service.ts
 import * as commentRepository from "./comment.repository";
 import { ForbiddenError, NotFoundError } from "../types/error.type";
 import { BoardType } from "./comment.schema";
