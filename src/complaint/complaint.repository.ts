@@ -8,7 +8,9 @@ import {
 
 const complaintRepository = AppDataSource.getRepository(Complaint);
 
-export async function createComplaint(data: CreateComplaintInput & { userId: string }) {
+export async function createComplaint(
+  data: CreateComplaintInput & { userId: string; boardId: string } // boardId 필수
+) {
   const complaintData = {
     ...data,
     status: data.status || ComplaintStatus.PENDING,

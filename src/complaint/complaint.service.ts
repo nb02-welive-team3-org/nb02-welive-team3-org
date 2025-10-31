@@ -20,11 +20,11 @@ export async function createComplaintService(data: CreateComplaintInput, userId:
 
   if (!user) throw new Error("사용자를 찾을 수 없습니다.");
 
-  // boardId 자동 주입
+  // boardId 필수 확인 및 자동 주입
   let boardId = data.boardId;
   if (!boardId) {
-    if (!user.apartment?.complaintBoard) {
-      throw new Error("아파트 게시판이 설정되어 있지 않습니다.");
+    if (!user.apartment?.complaintBoard?.id) {
+      throw new Error("아파트 게시판이 설정되어 있지 않습니다. 관리자에게 문의하세요.");
     }
     boardId = user.apartment.complaintBoard.id;
   }
