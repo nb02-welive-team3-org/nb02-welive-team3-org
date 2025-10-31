@@ -15,6 +15,7 @@ import complaint from './complaint/complaint.router';
 import vote from './votes/votes.router';
 import notice from './notice/notice.router';
 import pollSchedulerRouter from './poll-scheduler/poll-scheduler.router';
+import comment from './comments/comment.router';
 import { setupSwagger } from './swagger/swaggerSetup';
 
 const app: Application = express();
@@ -44,6 +45,7 @@ app.use('/api/polls', pollsRouter);
 app.use('/api/options', vote);
 app.use('/api/notices', notice);
 app.use('/api/poll-scheduler', pollSchedulerRouter);
+app.use('/api/comments', comment);
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
