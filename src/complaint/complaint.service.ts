@@ -68,7 +68,15 @@ export async function createComplaintService(data: CreateComplaintInput, userId:
  */
 export async function getComplaintsService(page: number, limit: number) {
   const { complaints, totalCount } = await repository.getComplaints(page, limit);
-  return new ComplaintListResponseDto(complaints, totalCount);
+
+  const complaintsWithCount = await Promise.all(
+    complaints.map(async (c) => {
+      const count = await repository.countCommentsByComplaintId(c.complaintId);
+      return { ...c, commentsCount: count };
+    })
+  );
+
+  return new ComplaintListResponseDto(complaintsWithCount, totalCount);
 }
 
 /**
@@ -76,7 +84,10 @@ export async function getComplaintsService(page: number, limit: number) {
  */
 export async function getComplaintByIdService(complaintId: string) {
   const complaint = await repository.getComplaintById(complaintId);
-  return complaint ? new ComplaintDetailDto(complaint) : null;
+  if (!complaint) return null;
+
+  const commentsCount = await repository.countCommentsByComplaintId(complaint.complaintId);
+  return new ComplaintDetailDto({ ...complaint, commentsCount });
 }
 
 /**

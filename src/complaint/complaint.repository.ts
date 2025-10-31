@@ -1,5 +1,6 @@
 import { AppDataSource } from "../config/data-source";
 import { Complaint, ComplaintStatus } from "../entities/complaint.entity";
+import { Comment } from "../entities/comment.entity";
 import {
   CreateComplaintInput,
   UpdateComplaintInput,
@@ -58,4 +59,9 @@ export async function updateComplaintStatus(complaintId: string, data: UpdateCom
   await complaintRepository.update({ complaintId }, { status: data.status as ComplaintStatus });
   const complaint = await getComplaintById(complaintId);
   return complaint;
+}
+
+export async function countCommentsByComplaintId(complaintId: string): Promise<number> {
+  const commentRepository = AppDataSource.getRepository(Comment);
+  return commentRepository.count({ where: { complaintId } });
 }
