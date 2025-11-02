@@ -1,4 +1,3 @@
-import { ILike } from 'typeorm';
 import { CreateNoticeRequestDto } from './dto/create-notice.dto';
 import { AppDataSource } from '../config/data-source';
 import { Notice, NoticeCategory } from '../entities/notice.entity';
@@ -11,92 +10,134 @@ import { UpdateRequestDto } from './dto/update-notice.request.dto';
 import { UpdateResponseSchema } from './dto/update-notice.response.dto';
 import { DeleteNoticeRequestDtoType, DeleteNoticeResponseDto } from './dto/delete-notice.dto';
 import { CommentResponseDto } from './dto/create-comment.response.dto';
+import { NoticeBoard } from '../entities/notice-board.entity';
 
-//공지사항 생성 서비스
-export const createNotice = async (data: CreateNoticeRequestDto) => {
+// 공지사항 생성 서비스
+export const createNotice = async (data: CreateNoticeRequestDto & { userId: string }) => {
   const noticeRepo = AppDataSource.getRepository(Notice);
-  const target = noticeRepo.create({
-    userId: data.userId,
-    boardId: data.boardId,
-    category: NoticeCategory[data.category],
-    title: data.title,
-    content: data.content,
-    isPinned: data.isPinned,
-    startDate: data.startDate,
-    endDate: data.endDate,
+  const noticeBoardRepo = AppDataSource.getRepository(NoticeBoard);
+  const userRepo = AppDataSource.getRepository(User);
+
+  // 사용자 정보 가져오기 (user → apartmentId 확인)
+  const user = await userRepo.findOne({
+    where: { id: data.userId },
+    relations: { apartment: true },
   });
 
-  await noticeRepo.save(target);
+  if (!user || !user.apartmentId) {
+    throw new Error('유효하지 않은 사용자입니다. (apartmentId 누락)');
+  }
+
+  // 사용자 아파트에 해당하는 NoticeBoard 찾기
+  let board = await noticeBoardRepo.findOne({
+    where: { apartmentId: user.apartmentId },
+  });
+
+  if (!board) {
+    throw new Error('해당 아파트의 NOTICE 게시판이 존재하지 않습니다.');
+  }
+
+  // 공지 생성
+  const notice = noticeRepo.create({
+    userId: data.userId,
+    boardId: board.id,
+    category: NoticeCategory[data.category as keyof typeof NoticeCategory],
+    title: data.title,
+    content: data.content,
+    isPinned: data.isPinned ?? false,
+    viewsCount: 0,
+    startDate: data.startDate ? new Date(data.startDate) : undefined,
+    endDate: data.endDate ? new Date(data.endDate) : undefined,
+  });
+
+  await noticeRepo.save(notice);
+  return { message: '정상적으로 등록 처리되었습니다.' };
 };
 
 // Poll Scheduler용 공지사항 생성 함수 (userId 포함)
 export const createNoticeWithUserId = async (data: CreateNoticeRequestDto & { userId: string }) => {
   const noticeRepo = AppDataSource.getRepository(Notice);
-  const target = noticeRepo.create({
+  const noticeBoardRepo = AppDataSource.getRepository(NoticeBoard);
+  const userRepo = AppDataSource.getRepository(User);
+
+  const user = await userRepo.findOne({
+    where: { id: data.userId },
+    relations: { apartment: true },
+  });
+
+  if (!user || !user.apartmentId) throw new Error('유효하지 않은 사용자입니다.');
+
+  const board = await noticeBoardRepo.findOne({ where: { apartmentId: user.apartmentId } });
+  if (!board) throw new Error('해당 아파트의 NOTICE 게시판이 존재하지 않습니다.');
+
+  const notice = noticeRepo.create({
     userId: data.userId,
-    boardId: data.boardId,
+    boardId: board.id,
     category: NoticeCategory[data.category],
     title: data.title,
     content: data.content,
-    isPinned: data.isPinned,
-    viewsCount: 0, // 초기값 0
+    isPinned: data.isPinned ?? false,
+    viewsCount: 0,
     startDate: data.startDate ? new Date(data.startDate) : undefined,
     endDate: data.endDate ? new Date(data.endDate) : undefined,
   });
 
-  await noticeRepo.save(target);
+  await noticeRepo.save(notice);
 };
 
-export const ListNotice = async (query: NoticeListqueryDto): Promise<NoticeListResponseDto> => {
+export const ListNotice = async (
+  query: NoticeListqueryDto
+): Promise<NoticeListResponseDto> => {
   const noticeRepo = AppDataSource.getRepository(Notice);
-
-  // ✅ totalCount 변수에 전체 개수 저장!
-  const [notices, totalCount] = await noticeRepo.findAndCount({
-    skip: (query.page - 1) * query.limit,
-    take: query.limit,
-    where: [
-      {
-        category: query.category ? NoticeCategory[query.category] : undefined,
-        title: query.search ? ILike(`%${query.search}%`) : undefined,
-      },
-      {
-        category: query.category ? NoticeCategory[query.category] : undefined,
-        content: query.search ? ILike(`%${query.search}%`) : undefined,
-      },
-    ],
-    relations: {
-      comments: true,
-    },
-  });
-
   const userRepo = AppDataSource.getRepository(User);
-  var data = await Promise.all(
-    notices.map(async (value, _): Promise<NoticeListItemDto> => {
-      var targetUser = await userRepo.findOneBy({ id: value.userId });
+
+  const qb = noticeRepo.createQueryBuilder('notice')
+    .leftJoinAndSelect('notice.comments', 'comments')
+    .skip((query.page - 1) * query.limit)
+    .take(query.limit)
+    .orderBy('notice.isPinned', 'DESC')
+    .addOrderBy('notice.createdAt', 'DESC');
+
+  if (query.boardId) {
+    qb.andWhere('notice.boardId = :boardId', { boardId: query.boardId });
+  }
+
+  if (query.category) {
+    qb.andWhere('notice.category = :category', { category: query.category });
+  }
+
+  if (query.search) {
+    qb.andWhere('(notice.title ILIKE :search OR notice.content ILIKE :search)', {
+      search: `%${query.search}%`,
+    });
+  }
+
+  const [notices, totalCount] = await qb.getManyAndCount();
+
+  const items: NoticeListItemDto[] = await Promise.all(
+    notices.map(async notice => {
+      const user = await userRepo.findOneBy({ id: notice.userId });
       return {
-        noticeId: value.id,
-        userId: value.userId,
-        category: value.category,
-        title: value.title,
-        writerName: targetUser ? targetUser.name : '',
-        isPinned: value.isPinned,
-        boardId: value.boardId,
-        viewsCount: value.viewsCount,
-        commentsCount: value.comments.length,
-        startDate: value.startDate ? value.startDate.toISOString() : undefined,
-        endDate: value.endDate ? value.endDate.toISOString() : undefined,
-        createdAt: value.createdAt.toISOString(),
-        updatedAt: value.updatedAt.toISOString(),
+        noticeId: notice.id,
+        userId: notice.userId,
+        category: notice.category,
+        title: notice.title,
+        writerName: user?.name || '',
+        isPinned: notice.isPinned,
+        boardId: notice.boardId,
+        viewsCount: notice.viewsCount,
+        commentsCount: notice.comments.length,
+        startDate: notice.startDate?.toISOString(),
+        endDate: notice.endDate?.toISOString(),
+        createdAt: notice.createdAt.toISOString(),
+        updatedAt: notice.updatedAt.toISOString(),
       };
     })
   );
 
-  const response: NoticeListResponseDto = {
-    items: data,
-    totalCount: totalCount, // ✅ data.length → totalCount로 변경!
-  };
-  return response;
+  return { notices: items, totalCount };
 };
+
 
 export const NoticeDetail = async (noticeId: string): Promise<NoticeDetailResponseDto> => {
   const noticeRepo = AppDataSource.getRepository(Notice);
@@ -155,26 +196,30 @@ export const NoticeDetail = async (noticeId: string): Promise<NoticeDetailRespon
 export const UpdateNotice = async (data: UpdateRequestDto) => {
   const noticeRepo = AppDataSource.getRepository(Notice);
 
-  await noticeRepo.update(
-    {
-      id: data.noticeId,
-      userId: data.userId,
-    },
-    {
-      boardId: data.boardId,
-      category: NoticeCategory[data.category as keyof typeof NoticeCategory],
-      title: data.title,
-      content: data.content,
-      isPinned: data.isPinned,
-      startDate: data.startDate,
-      endDate: data.endDate,
-    }
-  );
+  const updateData: any = {
+    category: NoticeCategory[data.category as keyof typeof NoticeCategory],
+    title: data.title,
+    content: data.content,
+    isPinned: data.isPinned ?? false,
+    startDate: data.startDate ? new Date(data.startDate) : undefined,
+    endDate: data.endDate ? new Date(data.endDate) : undefined,
+  };
 
+  // boardId가 null이 아닌 경우만 넣기
+  if (data.boardId) {
+    updateData.boardId = data.boardId;
+  }
+
+  // 업데이트
+  await noticeRepo.update({ id: data.noticeId }, updateData);
+
+  // 변경 후 엔티티 조회
   const updated = await noticeRepo.findOneBy({ id: data.noticeId });
 
+  // Zod로 검증 후 반환
   return UpdateResponseSchema.parse(updated);
 };
+
 
 export const DeleteNotice = async (data: DeleteNoticeRequestDtoType) => {
   const noticeRepo = AppDataSource.getRepository(Notice);

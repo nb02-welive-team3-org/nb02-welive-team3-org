@@ -33,7 +33,7 @@ export const CreateNoticeRequestSchema = z
       .min(1, "내용은 1~200자여야 합니다.")
       .max(200, "내용은 1~200자여야 합니다.")
       .refine((v) => !FORBID_HTML.test(v), "HTML 태그(<, >)는 허용되지 않습니다."),
-    boardId: z.string().uuid("boardId는 UUID 형식이어야 합니다."),
+    boardId: z.string().uuid("boardId는 UUID 형식이어야 합니다.").nullable().optional(),
     isPinned: z.boolean().optional().default(false),
     startDate: z.string().datetime().optional(), // ISO8601(UTC)
     endDate: z.string().datetime().optional(),   // ISO8601(UTC)

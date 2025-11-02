@@ -7,7 +7,8 @@ export const NoticeListquerySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).default(11),
     category: NoticeCategoryEnum.optional(),
-    search: z.string().optional()
+    search: z.string().optional(),
+    boardId: z.string().uuid().nullable().optional(),
 })
 export type NoticeListqueryDto = z.infer<typeof NoticeListquerySchema>;
 
@@ -20,7 +21,7 @@ export const NoticeListItemSchema = z.object({
     isPinned: z.boolean(),
     startDate: z.string().datetime().optional(),
     endDate: z.string().datetime().optional(),
-    boardId: z.string().uuid().optional(),
+    boardId: z.string().uuid().nullable().optional(),
 
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
@@ -33,7 +34,7 @@ export type NoticeListItemDto = z.infer<typeof NoticeListItemSchema>;
 
 //목록 응답(래퍼) — items + totalCount 
 export const NoticeListResponseSchema = z.object({
-    items: z.array(NoticeListItemSchema),
+    notices: z.array(NoticeListItemSchema),
     totalCount: z.number().int().nonnegative(),
 });
 export type NoticeListResponseDto = z.infer<typeof NoticeListResponseSchema>;
