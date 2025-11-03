@@ -36,7 +36,7 @@ export const createComment = async (data: {
     const saved = await commentRepo.save(comment);
 
     return {
-      commentId: saved.commentId,
+      id: saved.id,
       userId: saved.userId,
       content: saved.content,
       createdAt: saved.createdAt,
@@ -61,7 +61,7 @@ export const createComment = async (data: {
     const saved = await commentRepo.save(comment);
 
     return {
-      commentId: saved.commentId,
+      id: saved.id,
       userId: saved.userId,
       content: saved.content,
       createdAt: saved.createdAt,
@@ -73,8 +73,8 @@ export const createComment = async (data: {
   }
 };
 
-export const findById = async (commentId: string) => {
-  return await commentRepo.findOneBy({ commentId });
+export const findById = async (id: string) => {
+  return await commentRepo.findOneBy({ id });
 };
  
 export const getCommentsByBoard = async (data: {
@@ -93,7 +93,7 @@ export const getCommentsByBoard = async (data: {
     });
 
     return comments.map((comment) => ({
-      commentId: comment.commentId,
+      id: comment.id,
       userId: comment.userId,
       content: comment.content,
       createdAt: comment.createdAt,
@@ -112,7 +112,7 @@ export const getCommentsByBoard = async (data: {
     });
 
     return comments.map((comment) => ({
-      commentId: comment.commentId,
+      id: comment.id,
       userId: comment.userId,
       content: comment.content,
       createdAt: comment.createdAt,
@@ -123,22 +123,22 @@ export const getCommentsByBoard = async (data: {
 };
 
 export const updateComment = async ({
-  commentId,
+  id,
   content,
 }: {
-  commentId: string;
+  id: string;
   content: string;
 }) => {
-  await commentRepo.update({ commentId }, { content });
+  await commentRepo.update({ id }, { content });
 
-  const updated = await commentRepo.findOneBy({ commentId });
+  const updated = await commentRepo.findOneBy({ id });
   if (!updated) throw new NotFoundError("댓글을 찾을 수 없습니다.");
 
   const boardType: BoardType = updated.complaintId ? "COMPLAINT" : "NOTICE";
   const boardId = updated.complaintId || updated.noticeId!;
 
   return {
-    commentId: updated.commentId,
+    id: updated.id,
     userId: updated.userId,
     content: updated.content,
     createdAt: updated.createdAt,
@@ -149,11 +149,11 @@ export const updateComment = async ({
   };
 };
 
-export const deleteComment = async (commentId: string) => {
-  const comment = await commentRepo.findOneBy({ commentId });
+export const deleteComment = async (id: string) => {
+  const comment = await commentRepo.findOneBy({ id });
   if (!comment) throw new NotFoundError("삭제할 댓글을 찾을 수 없습니다.");
 
-  const result = await commentRepo.delete({ commentId });
+  const result = await commentRepo.delete({ id });
   if (result.affected === 0) {
     throw new NotFoundError("삭제할 댓글을 찾을 수 없습니다.");
   }

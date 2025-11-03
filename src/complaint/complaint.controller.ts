@@ -10,16 +10,29 @@ import {
  * 민원 등록
  */
 export const handleCreateComplaint = async (req: Request, res: Response) => {
-  const data = createComplaintSchema.parse(req.body);
-  const userId = req.user?.id;
+  try {
+    console.log("=== 민원 등록 요청 ===");
+    console.log("Body:", req.body);
+    console.log("User:", req.user);
 
-  if (!userId) {
-    return res.status(401).json({ message: "인증이 필요합니다." });
+    const data = createComplaintSchema.parse(req.body);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "인증이 필요합니다." });
+    }
+
+    const result = await service.createComplaintService(data, userId);
+
+    res.status(201).json({ message: "정상적으로 등록 처리되었습니다", data: result });
+  } catch (error: any) {
+    console.error("=== 민원 등록 에러 ===");
+    console.error(error);
+    res.status(500).json({ 
+      message: "민원 등록 중 오류가 발생했습니다.",
+      error: error.message 
+    });
   }
-
-  await service.createComplaintService(data, userId);
-
-  res.status(201).json({ message: "정상적으로 등록 처리되었습니다" });
 };
 
 /**

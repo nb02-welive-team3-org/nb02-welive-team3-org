@@ -1,10 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  JoinColumn,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { Apartment } from './apartment.entity';
 import { Complaint } from './complaint.entity';
-
-// =
-// : 민원 게시판
-// =
 
 @Entity('complaint_boards')
 export class ComplaintBoard {

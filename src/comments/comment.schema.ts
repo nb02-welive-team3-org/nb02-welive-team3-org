@@ -1,4 +1,3 @@
-// comment.schema.ts
 import { z } from "zod";
 
 export const BoardTypeEnum = z.enum(["COMPLAINT", "NOTICE"]);

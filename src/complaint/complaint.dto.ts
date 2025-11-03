@@ -1,3 +1,4 @@
+import { Comment } from "../entities/comment.entity";
 import { ComplaintStatus } from "../entities/complaint.entity";
 
 export class CreateComplaintDto {
@@ -72,6 +73,7 @@ export class ComplaintDetailDto {
   dong?: string;
   ho?: string;
   content!: string;
+  comments: Comment[];
 
   constructor(entity: any) {
     this.complaintId = entity.complaintId;
@@ -87,5 +89,6 @@ export class ComplaintDetailDto {
     this.dong = entity.dong;
     this.ho = entity.ho;
     this.content = entity.content;
+    this.comments = entity.comments;
   }
 }

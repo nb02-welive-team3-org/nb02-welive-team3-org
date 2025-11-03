@@ -162,7 +162,7 @@ export const NoticeDetail = async (noticeId: string): Promise<NoticeDetailRespon
         id: value.userId,
       });
       return {
-        id: value.commentId,
+        id: value.id,
         userId: value.userId,
         writerName: value.writerName,
         content: value.content,

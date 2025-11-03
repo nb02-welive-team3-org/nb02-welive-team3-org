@@ -14,13 +14,13 @@ import { Notice } from './notice.entity';
 @Entity({ name: 'comments' })
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
-  commentId!: string;
+  id!: string;
 
   @Column({ type: 'text' })
   content!: string;
 
   @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user!: User;
 
   @Column({ type: 'uuid' })
@@ -34,7 +34,7 @@ export class Comment {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'complaint_id' })
+  @JoinColumn({ name: 'complaintId' })
   complaint?: Complaint;
 
   @Column({ type: 'uuid', nullable: true })
@@ -45,7 +45,7 @@ export class Comment {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'notice_id' })
+  @JoinColumn({ name: 'noticeId' })
   notice?: Notice;
 
   @Column({ type: 'uuid', nullable: true })
